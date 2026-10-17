@@ -1,0 +1,4 @@
+falkordb>=1.8
+fastapi
+uvicorn
+mcp>=2.3

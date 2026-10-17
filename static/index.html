@@ -1,0 +1,3354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graph Brain — Autonomous DevOps Knowledge Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root {
+  --bg-app: #000000;
+  --bg-subtle: #050505;
+  --bg-sidebar: #050505;
+  --bg-card: #0c0c0c;
+  --bg-card-hover: #141414;
+  --bg-input: #0a0a0a;
+  --border: #222222;
+  --border-subtle: #161616;
+  --border-focus: #ffffff;
+  --border-strong: #333333;
+  --fg: #ffffff;
+  --fg-muted: #888888;
+  --fg-faint: #555555;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg-app); color: var(--fg); font: 14px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; transition: all 120ms ease; }
+input, select, textarea { font: inherit; color: inherit; background: none; border: 0; outline: none; }
+:focus-visible { outline: 1px solid #ffffff; outline-offset: 2px; }
+
+/* Custom Scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333333; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #555555; }
+
+/* Global Nav Header */
+.global-header {
+  height: 52px;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.global-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+}
+.brand-box {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #000;
+  border: 1.5px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 11px var(--mono);
+  color: #fff;
+}
+.brand-name {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+.brand-ver {
+  font: 600 10px var(--mono);
+  background: #111;
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+}
+.nav-switch {
+  display: flex;
+  background: #0a0a0a;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+  margin-left: 12px;
+}
+.nav-switch-btn {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+.nav-switch-btn.active {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+}
+.global-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tenant-indicator {
+  font: 500 11px var(--mono);
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-pill {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+.cta-header-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cta-header-btn:hover {
+  background: #e5e5e5;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   LANDING PAGE VIEW
+   ========================================================================== */
+.landing-view {
+  min-height: calc(100vh - 52px);
+  background: #000000;
+  overflow-y: auto;
+}
+.landing-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 24px 100px;
+}
+
+/* Hero */
+.landing-hero {
+  text-align: center;
+  max-width: 840px;
+  margin: 0 auto 70px;
+}
+.hero-tagline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: #0c0c0c;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font: 600 11px var(--mono);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 24px;
+}
+.hero-tagline span.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: pulseGlow 1.5s infinite alternate;
+}
+@keyframes pulseGlow {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1.3); }
+}
+.landing-hero h1 {
+  font-size: 48px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+.landing-hero p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--fg-muted);
+  max-width: 680px;
+  margin: 0 auto 36px;
+}
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.hero-btn-primary {
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-btn-primary:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.12);
+}
+.hero-btn-secondary {
+  padding: 12px 22px;
+  border-radius: 8px;
+  background: #0c0c0c;
+  border: 1px solid var(--border-strong);
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 14px;
+}
+.hero-btn-secondary:hover {
+  background: #181818;
+  border-color: #555;
+}
+
+/* Simulation Preview Card */
+.simulation-card {
+  background: #0a0a0a;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 80px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+.sim-header {
+  padding: 12px 18px;
+  background: #050505;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 500 12px var(--mono);
+}
+.sim-dots {
+  display: flex;
+  gap: 6px;
+}
+.sim-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid #333;
+}
+.sim-body {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.sim-log-block {
+  font: 12px/1.7 var(--mono);
+  color: var(--fg-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sim-log-block b { color: #ffffff; font-weight: 600; }
+.sim-tag-alert {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+.sim-graph-preview {
+  background: #000000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.sim-node-demo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sim-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  background: #fff;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 10px var(--mono);
+}
+.sim-arrow {
+  width: 36px;
+  height: 1px;
+  background: #555;
+  position: relative;
+}
+.sim-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -3px;
+  border-left: 5px solid #555;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+}
+.sim-box {
+  padding: 6px 12px;
+  border: 1.5px solid #fff;
+  border-radius: 4px;
+  font: 600 11px var(--mono);
+  background: #000;
+}
+
+/* Metric Strip */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 80px;
+}
+.metric-box {
+  background: #090909;
+  padding: 24px 20px;
+  text-align: center;
+  transition: background 150ms ease;
+}
+.metric-box:hover {
+  background: #111111;
+}
+.metric-num {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: var(--mono);
+  margin-bottom: 4px;
+}
+.metric-lbl {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+/* Architecture Workflow Grid */
+.arch-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 80px;
+}
+.arch-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: all 150ms ease;
+}
+.arch-card:hover {
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  background: #111111;
+}
+.arch-card-num {
+  font: 700 24px var(--mono);
+  color: #222222;
+  position: absolute;
+  top: 14px;
+  right: 16px;
+}
+.arch-badge {
+  align-self: flex-start;
+  font: 700 9px var(--mono);
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #000;
+  border: 1px solid var(--border-strong);
+  color: #ffffff;
+}
+.arch-card h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.arch-card p {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--fg-muted);
+}
+
+/* Bento Feature Grid */
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+.section-subtitle {
+  font-size: 15px;
+  color: var(--fg-muted);
+  margin-bottom: 36px;
+  max-width: 600px;
+}
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 80px;
+}
+.bento-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 150ms ease;
+}
+.bento-card:hover {
+  background: var(--bg-card-hover);
+  border-color: #555555;
+  transform: translateY(-2px);
+}
+.bento-card.col-span-2 {
+  grid-column: span 2;
+}
+.bento-badge {
+  align-self: flex-start;
+  font: 600 10px var(--mono);
+  text-transform: uppercase;
+  background: #181818;
+  border: 1px solid var(--border-strong);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+}
+.bento-card h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.bento-card p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--fg-muted);
+}
+
+/* Quick Launchpad */
+.launchpad-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 80px;
+}
+.launch-card {
+  background: #090909;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.launch-card:hover {
+  background: #141414;
+  border-color: #ffffff;
+  transform: translateY(-1px);
+}
+.launch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.launch-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.launch-desc {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+.launch-arrow {
+  font-size: 18px;
+  color: var(--fg-muted);
+}
+.launch-card:hover .launch-arrow {
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+/* Shimmer Loading Skeleton */
+@keyframes shimmerPulse {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-box {
+  background: linear-gradient(90deg, #0e0e0e 25%, #222222 50%, #0e0e0e 75%);
+  background-size: 200% 100%;
+  animation: shimmerPulse 1.6s infinite ease-in-out;
+  border-radius: 6px;
+}
+.sim-replay-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #181818;
+  border: 1px solid #333333;
+  color: #ffffff;
+  font: 500 11px var(--mono);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sim-replay-btn:hover {
+  background: #ffffff;
+  color: #000000;
+}
+.landing-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 500 12px var(--mono);
+  color: var(--fg-faint);
+}
+
+/* ==========================================================================
+   WORKBENCH CONSOLE VIEW (3-Column Layout)
+   ========================================================================== */
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr 440px;
+  height: calc(100vh - 52px);
+  height: calc(100dvh - 52px);
+  overflow: hidden;
+}
+
+/* Left Sidebar */
+aside.sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  user-select: none;
+}
+.sidebar-header {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.new-chat-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  font-weight: 500;
+  font-size: 13px;
+}
+.new-chat-btn:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+.new-chat-btn:hover .kbd-hint {
+  background: #000000;
+  color: #ffffff;
+}
+.kbd-hint {
+  font: 500 10.5px var(--mono);
+  background: #181818;
+  border: 1px solid var(--border);
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+}
+
+.search-box {
+  margin: 12px 14px 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  gap: 8px;
+}
+.search-box svg { flex: none; color: var(--fg-faint); }
+.search-box input { width: 100%; font-size: 12px; }
+.search-box input::placeholder { color: var(--fg-faint); }
+
+.history-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+}
+.history-section-title {
+  font: 600 10px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-faint);
+  padding: 8px 6px 6px;
+}
+.conv-item {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+.conv-item:hover {
+  background: var(--bg-card-hover);
+  color: #ffffff;
+  border-color: #222222;
+}
+.conv-item.active {
+  background: #161616;
+  color: #ffffff;
+  font-weight: 500;
+  border-color: #444444;
+}
+.conv-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.conv-del {
+  opacity: 0;
+  color: var(--fg-faint);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+}
+.conv-item:hover .conv-del { opacity: 1; }
+.conv-del:hover { color: #000000; background: #ffffff; }
+
+.sidebar-footer {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-sidebar);
+}
+.health-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 11px/1.4 var(--mono);
+  color: var(--fg-muted);
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Center Chat Pane */
+main.chat-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg-app);
+  position: relative;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(12px);
+  z-index: 2;
+}
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mode-toggle {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+}
+.mode-btn {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mode-btn.active {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+}
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel-toggle-btn {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font: 500 12px var(--mono);
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel-toggle-btn:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+/* Active Stream Banner & Multi-Agent Pipeline HUD */
+.stream-banner {
+  padding: 10px 18px;
+  background: #080808;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 150ms ease;
+  z-index: 2;
+}
+.stream-banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 500 12px var(--mono);
+  color: #ffffff;
+}
+.stream-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stream-pulse-ring {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: pulseGlow 1s infinite alternate;
+  box-shadow: 0 0 8px #ffffff;
+}
+.stream-loading-dots span {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffffff;
+  margin: 0 1.5px;
+  animation: bounceDot 1.2s infinite ease-in-out;
+}
+.stream-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.stream-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounceDot {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.3; }
+  40% { transform: translateY(-3px); opacity: 1; }
+}
+.pipeline-flow-hud {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #000000;
+  border: 1px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 6px 10px;
+  overflow-x: auto;
+}
+.pipeline-step-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font: 600 10px var(--mono);
+  color: var(--fg-faint);
+  background: #080808;
+  border: 1px solid #161616;
+  white-space: nowrap;
+  transition: all 150ms ease;
+}
+.pipeline-step-item.active {
+  background: #141414;
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+}
+.pipeline-step-item.completed {
+  background: #0d0d0d;
+  border-color: #444444;
+  color: #cccccc;
+}
+.pipeline-step-item .pipe-num {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1c1c1c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8.5px;
+}
+.pipeline-step-item.active .pipe-num {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 700;
+}
+.pipeline-step-item.completed .pipe-num {
+  background: #333333;
+  color: #ffffff;
+}
+.pipe-divider {
+  font-size: 10px;
+  color: #333333;
+}
+
+/* Message thread */
+.thread-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 0 16px;
+}
+.thread-wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Chat Messages */
+.message-row {
+  margin-bottom: 28px;
+  animation: fadeInUp 0.2s ease-out;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.message-row.user {
+  display: flex;
+  justify-content: flex-end;
+}
+.user-bubble {
+  background: #ffffff;
+  border: 1px solid #ffffff;
+  color: #000000;
+  padding: 12px 18px;
+  border-radius: 16px 16px 4px 16px;
+  max-width: 82%;
+  font-size: 14px;
+  white-space: pre-wrap;
+  font-weight: 500;
+}
+.user-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.mode-badge-pill {
+  font: 700 9.5px var(--mono);
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #000000;
+  color: #ffffff;
+}
+
+.bot-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bot-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 11px var(--mono);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.agent-pill {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #111111;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #ffffff;
+}
+
+/* Markdown rendering */
+.md-content {
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.md-content p { margin-bottom: 12px; }
+.md-content p:last-child { margin-bottom: 0; }
+.md-content ul, .md-content ol { margin: 0 0 12px; padding-left: 20px; }
+.md-content li { margin-bottom: 4px; }
+.md-content strong { color: #ffffff; font-weight: 600; }
+.md-content code {
+  font: 12.5px var(--mono);
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: #ffffff;
+}
+.md-content pre {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 12px 0;
+  font: 12px var(--mono);
+  color: #cccccc;
+}
+
+/* Citation Pill */
+.cite-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font: 600 11.5px var(--mono);
+  background: #111111;
+  border: 1px solid #333333;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 0 6px;
+  margin: 0 2px;
+  cursor: pointer;
+  transition: all 120ms ease;
+  vertical-align: baseline;
+}
+.cite-pill:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  transform: translateY(-1px);
+}
+.cite-pill::before { content: '◧'; font-size: 10px; opacity: 0.6; }
+
+/* Reasoning Trace Accordion */
+details.trace-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0 14px;
+  font: 12px/1.55 var(--mono);
+  overflow: hidden;
+}
+details.trace-card summary {
+  padding: 10px 14px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  background: #080808;
+}
+details.trace-card summary:hover {
+  color: #ffffff;
+  background: #111111;
+}
+.trace-steps {
+  border-top: 1px solid var(--border);
+  padding: 10px 14px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #000000;
+}
+.trace-step-item {
+  color: var(--fg-muted);
+  font-size: 11.5px;
+  padding: 4px 0;
+}
+.trace-step-item b {
+  color: #ffffff;
+  font-weight: 600;
+}
+.trace-step-item.handoff {
+  background: #161616;
+  border-left: 2px solid #ffffff;
+  padding: 6px 8px;
+  border-radius: 3px;
+  color: #ffffff;
+}
+.trace-step-item pre {
+  margin: 4px 0 0 12px;
+  padding: 6px 8px;
+  background: #0d0d0d;
+  border: 1px solid #1f1f1f;
+  border-radius: 4px;
+  color: #888888;
+  font-size: 11px;
+  max-height: 100px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* Decision Receipt Card */
+.receipt-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0 16px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.receipt-card:hover {
+  border-color: #666666;
+}
+.receipt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.receipt-badge {
+  font: 600 11px var(--mono);
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.receipt-view-btn {
+  font: 600 11px var(--mono);
+  color: #000000;
+  background: #ffffff;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.receipt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.receipt-col {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1.5px solid;
+}
+.receipt-col.chosen {
+  background: #141414;
+  border-color: #ffffff;
+}
+.receipt-col.rejected {
+  background: #080808;
+  border-color: #444444;
+  border-style: dashed;
+  opacity: 0.75;
+}
+.receipt-col-title {
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.receipt-col.chosen .receipt-col-title { color: #ffffff; }
+.receipt-col.rejected .receipt-col-title { color: #888888; }
+.receipt-stats {
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.5;
+}
+.receipt-why {
+  font: 11.5px/1.5 var(--mono);
+  color: var(--fg-muted);
+  background: #080808;
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+/* Composer Area */
+.composer-area {
+  padding: 14px 20px 20px;
+  background: linear-gradient(180deg, transparent, var(--bg-app) 25%);
+}
+.composer-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.composer-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  transition: border-color 150ms ease;
+}
+.composer-box:focus-within {
+  border-color: #ffffff;
+}
+.composer-box textarea {
+  width: 100%;
+  resize: none;
+  min-height: 28px;
+  max-height: 180px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ffffff;
+}
+.composer-box textarea::placeholder {
+  color: var(--fg-faint);
+}
+.composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #1a1a1a;
+}
+.composer-hint {
+  font: 11px var(--mono);
+  color: var(--fg-faint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+.send-btn:hover:not(:disabled) {
+  background: #ffffff;
+  transform: scale(1.05);
+}
+.send-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==========================================================================
+   RIGHT PANEL (CYTOSCAPE GRAPH & EXPLORER)
+   ========================================================================== */
+aside.right-pane {
+  background: var(--bg-sidebar);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  background: #000000;
+}
+.tab-btn {
+  padding: 12px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  border-bottom: 2px solid transparent;
+}
+.tab-btn:hover { color: #ffffff; }
+.tab-btn.active {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+  font-weight: 600;
+}
+
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.tab-pane {
+  display: none;
+  height: 100%;
+  flex-direction: column;
+  position: relative;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.tab-pane.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Force layout reflow for tab activation animation */
+.tab-pane.entering {
+  display: flex;
+}
+
+/* Smooth right-panel slide-in on mobile */
+aside.right-pane {
+  transition: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Subtle app-shell entrance */
+@keyframes shellFadeIn {
+  from { opacity: 0; transform: scale(0.995); }
+  to   { opacity: 1; transform: scale(1); }
+}
+#appShell.visible {
+  animation: shellFadeIn 220ms ease-out forwards;
+}
+
+/* Enhanced Graph Toolbar */
+.graph-toolbar {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #050505;
+}
+.svc-select-wrap {
+  flex: 1;
+}
+select.svc-select {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font: 500 12px var(--mono);
+  color: #ffffff;
+  cursor: pointer;
+}
+.graph-btn-group {
+  display: flex;
+  gap: 4px;
+}
+.graph-btn {
+  padding: 6px 9px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: 12px var(--mono);
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.graph-btn:hover { background: #ffffff; color: #000000; border-color: #ffffff; }
+
+/* Blueprint Grid Background & Canvas */
+#cy-wrap {
+  flex: 1;
+  min-height: 200px;
+  position: relative;
+  background-color: #030303;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 80%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 100% 100%, 22px 22px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+#cy {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  /* GPU acceleration for smooth rendering */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Zoom HUD smooth update */
+.cy-hud-zoom {
+  transition: opacity 150ms ease;
+}
+
+/* Node appear animation */
+@keyframes nodeEnter {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Smooth graph-btn zoom press */
+.graph-btn:active {
+  transform: scale(0.92);
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Pulse ring on focused node (CSS overlay trick via HUD) */
+@keyframes nodeRingPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+.graph-btn {
+  transition: background 100ms ease, color 100ms ease, transform 80ms ease, border-color 100ms ease;
+}
+
+/* Corner HUD Overlays */
+.cy-hud-top-left {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: 600 10.5px var(--mono);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 40;
+  pointer-events: none;
+}
+.cy-hud-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
+}
+.cy-hud-top-right {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: 500 10.5px var(--mono);
+  color: var(--fg-muted);
+  z-index: 40;
+  pointer-events: none;
+}
+.cy-hud-layout-pills {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 3px;
+  display: flex;
+  gap: 3px;
+  z-index: 40;
+  pointer-events: auto;
+}
+.cy-layout-pill {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font: 600 10px var(--mono);
+  color: #888888;
+  background: #121212;
+  border: 1px solid transparent;
+  transition: all 120ms ease;
+  cursor: pointer;
+}
+.cy-layout-pill:hover {
+  color: #ffffff;
+  background: #222222;
+  border-color: #444444;
+}
+.cy-layout-pill.active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+.cy-hud-zoom {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font: 600 10px var(--mono);
+  color: var(--fg-muted);
+  z-index: 40;
+  pointer-events: none;
+}
+
+/* Tactical Sonar Radar Scanner Overlay */
+.graph-loader {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 2, 2, 0.94);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+.graph-loader.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.radar-scan-box {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.radar-crosshair-h {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+.radar-crosshair-v {
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+}
+.sonar-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+.sonar-ring.r-1 { width: 48px; height: 48px; border-style: solid; border-color: rgba(255, 255, 255, 0.35); }
+.sonar-ring.r-2 { width: 92px; height: 92px; animation: sonarPulse 3s infinite linear; }
+.sonar-ring.r-3 { width: 136px; height: 136px; border-color: rgba(255, 255, 255, 0.12); }
+@keyframes sonarPulse {
+  0% { transform: scale(0.85); opacity: 0.2; }
+  50% { transform: scale(1.05); opacity: 0.6; }
+  100% { transform: scale(0.85); opacity: 0.2; }
+}
+.radar-sweep-cone {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 70%, rgba(255, 255, 255, 0.45) 100%);
+  animation: radarRotate 1.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes radarRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.radar-center-core {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffffff;
+}
+.radar-blip {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ffffff;
+  animation: blipFade 1.5s infinite;
+}
+.radar-blip.b-1 { top: 32px; left: 88px; animation-delay: 0.3s; }
+.radar-blip.b-2 { bottom: 35px; right: 38px; animation-delay: 0.8s; }
+.radar-blip.b-3 { top: 78px; left: 24px; animation-delay: 1.2s; }
+@keyframes blipFade {
+  0%, 100% { opacity: 0.1; transform: scale(0.7); }
+  40% { opacity: 1; transform: scale(1.2); }
+  70% { opacity: 0.4; }
+}
+.loader-terminal {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.loader-sys-label {
+  font: 700 10.5px var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--fg-faint);
+  text-transform: uppercase;
+}
+.loader-status-text {
+  font: 600 12px var(--mono);
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+.loader-wire-bar {
+  width: 140px;
+  height: 2px;
+  background: #181818;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  margin-top: 4px;
+}
+.loader-wire-fill {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 45px;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
+  animation: wireGlide 1.2s infinite ease-in-out;
+}
+@keyframes wireGlide {
+  0% { left: -45px; }
+  100% { left: 140px; }
+}
+
+/* Graph Node Floating Info Tooltip */
+.node-tooltip {
+  position: absolute;
+  background: rgba(8, 8, 8, 0.97);
+  border: 1px solid #333333;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: #ffffff;
+  pointer-events: none;
+  z-index: 25;
+  display: none;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.95);
+  min-width: 160px;
+  max-width: 240px;
+  backdrop-filter: blur(8px);
+  line-height: 1.5;
+}
+
+.graph-legend {
+  padding: 7px 12px;
+  border-top: 1px solid var(--border);
+  font: 10.5px var(--sans);
+  color: var(--fg-faint);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  background: #050505;
+  align-items: center;
+}
+.legend-item { display: flex; align-items: center; gap: 4px; color: var(--fg-muted); font-size: 10.5px; }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.legend-dot.square { border-radius: 2px; }
+.legend-dot.diamond {
+  width: 8px; height: 8px;
+  border-radius: 1px;
+  transform: rotate(45deg);
+}
+.legend-dot.hex { border-radius: 2px; }
+
+/* Inspector Tab */
+.inspector-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #000000;
+}
+.service-header-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.service-tier-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.tier-tag {
+  font: 600 10px var(--mono);
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.tier-1 { background: #ffffff; color: #000000; font-weight: 700; }
+.tier-2 { background: #222222; color: #ffffff; border: 1px solid #444444; }
+.tier-3 { background: #111111; color: #888888; border: 1px solid #222222; }
+.service-name-title {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: #ffffff;
+}
+.service-owner-label {
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 4px;
+}
+
+.inspector-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.inspector-title {
+  font: 600 11px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-faint);
+  margin-bottom: 10px;
+}
+.member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+.member-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 10px var(--mono);
+  color: #ffffff;
+}
+.dep-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dep-pill {
+  font: 500 11.5px var(--mono);
+  background: #111111;
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #cccccc;
+  cursor: pointer;
+}
+.dep-pill:hover { background: #ffffff; color: #000000; border-color: #ffffff; }
+
+/* Runbooks Tab */
+.runbooks-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #000000;
+}
+.runbook-accordion {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.runbook-accordion summary {
+  padding: 12px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #ffffff;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.runbook-accordion summary:hover { background: #141414; }
+.runbook-steps-list {
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #050505;
+}
+.runbook-step-card {
+  padding: 8px 10px;
+  background: #0f0f0f;
+  border: 1px solid #222222;
+  border-radius: 4px;
+  font-size: 12.5px;
+}
+.runbook-step-card b {
+  font: 600 11px var(--mono);
+  color: #ffffff;
+  margin-right: 6px;
+}
+.runbook-fallback-block {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: #1a1a1a;
+  border-left: 2px solid #ffffff;
+  border-radius: 2px;
+  font-size: 11.5px;
+  color: #cccccc;
+}
+
+/* Mobile responsive */
+@media (max-width: 1024px) {
+  .app-shell { grid-template-columns: 1fr; }
+  aside.sidebar {
+    display: none;
+    position: fixed;
+    inset: 52px auto 0 0;
+    width: 280px;
+    z-index: 100;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.9);
+  }
+  .app-shell.sidebar-open aside.sidebar { display: flex; }
+  aside.right-pane {
+    display: none;
+    position: fixed;
+    inset: 52px 0 0 auto;
+    width: min(440px, 100%);
+    z-index: 100;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.9);
+  }
+  .app-shell.graph-open aside.right-pane { display: flex; }
+  .bento-grid { grid-template-columns: 1fr; }
+  .bento-card.col-span-2 { grid-column: span 1; }
+  .metrics-grid { grid-template-columns: 1fr 1fr; }
+  .sim-body { grid-template-columns: 1fr; }
+  .launchpad-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Navigation Header -->
+<header class="global-header">
+  <div class="global-left">
+    <div class="brand-link" id="brandHomeBtn">
+      <div class="brand-box">GB</div>
+      <div class="brand-name">Graph Brain</div>
+      <span class="brand-ver">v2.0</span>
+    </div>
+    <div class="nav-switch">
+      <button class="nav-switch-btn active" id="navLandingBtn">Overview</button>
+      <button class="nav-switch-btn" id="navConsoleBtn">Console</button>
+    </div>
+  </div>
+  <div class="global-right">
+    <div class="tenant-indicator">
+      <span class="status-pill" id="globalStatusDot"></span>
+      <span id="globalTenantLabel">tenant: acme</span>
+    </div>
+    <button class="cta-header-btn" id="headerActionBtn">
+      <span id="headerActionText">Open Console →</span>
+    </button>
+  </div>
+</header>
+
+<!-- ========================================================================
+     1. LANDING PAGE VIEW
+     ======================================================================== -->
+<div class="landing-view" id="landingView" style="display:block">
+  <div class="landing-inner">
+    <!-- Hero -->
+    <section class="landing-hero">
+      <div class="hero-tagline">
+        <span class="live-dot"></span>
+        <span>Graph-Native Autonomous DevOps · FalkorDB</span>
+      </div>
+      <h1>The Company Knowledge Graph for Autonomous DevOps.</h1>
+      <p>Services, teams, tickets, architecture decisions, and self-mutating runbooks live in unified FalkorDB graph memory. Dual AI agents answer live queries and autonomously triage and remediate production incidents.</p>
+      <div class="hero-actions">
+        <button class="hero-btn-primary" id="landingLaunchBtn">
+          <span>Open Agent Console</span>
+          <span>→</span>
+        </button>
+        <button class="hero-btn-secondary" id="landingSimBtn">
+          <span>Explore Capabilities</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Simulation Preview Card -->
+    <div class="simulation-card" id="simSection">
+      <div class="sim-header">
+        <div class="sim-dots">
+          <div class="sim-dot"></div>
+          <div class="sim-dot"></div>
+          <div class="sim-dot"></div>
+        </div>
+        <span>AUTONOMOUS_INCIDENT_STREAM // PIPELINE_SIMULATION</span>
+        <button class="sim-replay-btn" id="btnReplaySim"><span>↺</span> Replay Live Simulation</button>
+      </div>
+      <div class="sim-body">
+        <div class="sim-log-block" id="simLogBlock">
+          <div><span class="sim-tag-alert">ALERT</span><b>auth-service</b> returning 401s for 30% of logins</div>
+          <div><b>[TRIAGE AGENT]</b> Hop traversal over DEPENDS_ON*1..4: 6 upstream services impacted</div>
+          <div><b>[BLAST RADIUS]</b> 2 VIP customers hit: Globex Corp, Initech</div>
+          <div><b>[DECISION LINEAGE]</b> DEC-3 (jitter retry) inspected; recent token TTL change detected</div>
+          <div><b>[HANDOFF]</b> Created node <code>(:Incident {id: 'INC-c6775e'})</code> in graph</div>
+          <div><b>[REMEDIATION AGENT]</b> Recalled procedural memory: checking runbook <code>latency</code></div>
+          <div><b>[SANDBOX]</b> Counterfactual comparison: Restart vs Drain $\rightarrow$ <b>Drain chosen</b></div>
+          <div><b>[ASSIGNED]</b> Gus Moreno (identity) assigned with 4-step verified plan</div>
+        </div>
+        <div class="sim-graph-preview">
+          <div style="font:600 11px var(--mono);color:var(--fg-muted);">EVIDENCE GRAPH TOPOLOGY</div>
+          <div class="sim-node-demo" id="simDemoNodes">
+            <div class="sim-circle" id="simNodeC" title="Customer">C-1</div>
+            <div class="sim-arrow"></div>
+            <div class="sim-circle" id="simNodeGW" title="API Gateway">GW</div>
+            <div class="sim-arrow"></div>
+            <div class="sim-circle" id="simNodeAuth" style="background:#000;color:#fff;border-color:#fff" title="Auth Service">AUTH</div>
+          </div>
+          <div class="sim-box" id="simReceiptBox">Decision Receipt Generated · Chosen in White / Rejected in Gray</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric Strip -->
+    <div class="metrics-grid">
+      <div class="metric-box">
+        <div class="metric-num">30</div>
+        <div class="metric-lbl">Services in Dependency Graph</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-num">15</div>
+        <div class="metric-lbl">Engineers with Evidence Paths</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-num">6</div>
+        <div class="metric-lbl">Self-Mutating Runbooks</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-num">&lt; 1.8s</div>
+        <div class="metric-lbl">Average Query &amp; Blast Radius Speed</div>
+      </div>
+    </div>
+
+    <!-- Architecture Dataflow Section -->
+    <h2 class="section-title">Engineered on FalkorDB Knowledge Graph.</h2>
+    <p class="section-subtitle">How dual AI agents coordinate through graph nodes instead of unstructured vector context.</p>
+
+    <div class="arch-flow-grid">
+      <div class="arch-card">
+        <div class="arch-card-num">01</div>
+        <span class="arch-badge">GRAPH NATIVE</span>
+        <h4>Connected Company Memory</h4>
+        <p>30 services, 15 engineers, team ownership, past incident tickets, and architecture decisions stored in a unified FalkorDB graph.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-num">02</div>
+        <span class="arch-badge">PAGE RANK</span>
+        <h4>Transitive Blast Radius</h4>
+        <p>Up to 6-hop dependency traversal computes exact blast radius and identifies impacted VIP customers in milliseconds.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-num">03</div>
+        <span class="arch-badge">AUTONOMOUS</span>
+        <h4>Dual-Agent Graph Handoff</h4>
+        <p>Triage Agent verifies root cause and creates an Incident node. Remediation Agent immediately engages procedural runbooks.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-num">04</div>
+        <span class="arch-badge">SANDBOX</span>
+        <h4>Counterfactual Receipts</h4>
+        <p>Simulates consequences of competing actions (Restart vs Drain) before mutating infrastructure. Generates immutable DecisionReceipts.</p>
+      </div>
+    </div>
+
+    <!-- Feature Bento Grid -->
+    <h2 class="section-title">Architected for Production Intelligence.</h2>
+    <p class="section-subtitle">A high-fidelity company brain where context is connected graph data, not disconnected text snippets.</p>
+    
+    <div class="bento-grid">
+      <div class="bento-card col-span-2">
+        <span class="bento-badge">Graph Analytics</span>
+        <h3>Transitive Blast Radius &amp; PageRank Criticality</h3>
+        <p>Measure upstream dependencies up to 6 hops away, ranked by PageRank scores. Trace customer impact paths in real time and prioritize VIP stakeholders before deploying fixes or taking services down.</p>
+      </div>
+
+      <div class="bento-card">
+        <span class="bento-badge">Multi-Agent</span>
+        <h3>Autonomous Handoff via Graph</h3>
+        <p>Triage and Remediation agents coordinate strictly through FalkorDB nodes without polluting LLM contexts.</p>
+      </div>
+
+      <div class="bento-card">
+        <span class="bento-badge">Procedural Memory</span>
+        <h3>Self-Mutating Graph Runbooks</h3>
+        <p>Runbooks are executable graph edges. Operators can rewire fallback branches directly from natural chat without redeploying code.</p>
+      </div>
+
+      <div class="bento-card col-span-2">
+        <span class="bento-badge">Counterfactual Sandbox</span>
+        <h3>Decision Receipts &amp; Risk Simulation</h3>
+        <p>Before executing disruptive commands (restart, failover, rollback), simulate what services go dark and which VIP customers feel the impact. Generates immutable DecisionReceipt nodes.</p>
+      </div>
+    </div>
+
+    <!-- Quick Launchpad -->
+    <h2 class="section-title">Launch Interactive Prompts.</h2>
+    <p class="section-subtitle">Click any sample query to launch the Agent Console and run live graph queries immediately.</p>
+    
+    <div class="launchpad-grid">
+      <div class="launch-card" data-prompt="Who should I page for auth failures on auth-service, and why?" data-mode="ask">
+        <div class="launch-text">
+          <div class="launch-title">Who knows auth-service best?</div>
+          <div class="launch-desc">Find resolvers with ticket paths and identity team owners</div>
+        </div>
+        <span class="launch-arrow">→</span>
+      </div>
+
+      <div class="launch-card" data-prompt="auth-service is returning 401s for 30% of logins since 09:10" data-mode="incident">
+        <div class="launch-text">
+          <div class="launch-title">Simulate Live Incident on auth-service</div>
+          <div class="launch-desc">Full autonomous triage and remediation agent pipeline</div>
+        </div>
+        <span class="launch-arrow">→</span>
+      </div>
+
+      <div class="launch-card" data-prompt="What is the blast radius if postgres-main goes down?" data-mode="ask">
+        <div class="launch-text">
+          <div class="launch-title">Blast Radius of postgres-main</div>
+          <div class="launch-desc">Compute upstream dependents and VIP customer paths</div>
+        </div>
+        <span class="launch-arrow">→</span>
+      </div>
+
+      <div class="launch-card" data-prompt="postgres-main is degraded. Compare restarting postgres-main against draining traffic to region-b: which customers and VIPs would each hit?" data-mode="ask">
+        <div class="launch-text">
+          <div class="launch-title">Restart vs Traffic Drain Sandbox</div>
+          <div class="launch-desc">Counterfactual comparison with decision receipt generation</div>
+        </div>
+        <span class="launch-arrow">→</span>
+      </div>
+    </div>
+
+    <!-- Minimalist Footer -->
+    <footer class="landing-footer">
+      <div>Graph Brain · Autonomous DevOps Knowledge Engine</div>
+      <div>FalkorDB Graph Native · Google Gemini Flash · Pure Monochrome UI</div>
+    </footer>
+  </div>
+</div>
+
+<!-- ========================================================================
+     2. WORKBENCH AGENT CONSOLE VIEW
+     ======================================================================== -->
+<div class="app-shell" id="appShell" style="display:none">
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <button class="new-chat-btn" id="newChatBtn">
+        <span>+ New Session</span>
+        <span class="kbd-hint">⌘N</span>
+      </button>
+    </div>
+
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="convSearch" placeholder="Search conversations...">
+    </div>
+
+    <div class="history-container">
+      <div class="history-section-title">Knowledge Graph Sessions</div>
+      <div id="convList"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="health-status">
+        <span class="status-dot" id="healthDot"></span>
+        <span id="healthText">FalkorDB Connected</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Center Chat Area -->
+  <main class="chat-pane">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="panel-toggle-btn" id="mobileMenuBtn" style="display:none">☰ Menu</button>
+        <div class="mode-toggle" role="group" aria-label="Mode">
+          <button class="mode-btn active" id="modeAsk">Ask Brain</button>
+          <button class="mode-btn incident-mode" id="modeInc">Incident Triage</button>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="panel-toggle-btn" id="toggleGraphBtn">
+          <span>Evidence Graph</span>
+          <span style="font-size:11px">◧</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Active Stream Progress Banner & Multi-Agent Pipeline HUD -->
+    <div class="stream-banner" id="streamBanner" style="display:none">
+      <div class="stream-banner-top">
+        <div class="stream-banner-left">
+          <span class="stream-pulse-ring"></span>
+          <span id="streamBannerText">Agent evaluating knowledge graph...</span>
+        </div>
+        <div class="stream-loading-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="pipeline-flow-hud">
+        <div class="pipeline-step-item active" id="pipeStep1">
+          <span class="pipe-num">1</span>
+          <span class="pipe-name">INTENT &amp; QUERY</span>
+        </div>
+        <span class="pipe-divider">➔</span>
+        <div class="pipeline-step-item" id="pipeStep2">
+          <span class="pipe-num">2</span>
+          <span class="pipe-name">GRAPH TRAVERSAL</span>
+        </div>
+        <span class="pipe-divider">➔</span>
+        <div class="pipeline-step-item" id="pipeStep3">
+          <span class="pipe-num">3</span>
+          <span class="pipe-name">BLAST RADIUS &amp; RISK</span>
+        </div>
+        <span class="pipe-divider">➔</span>
+        <div class="pipeline-step-item" id="pipeStep4">
+          <span class="pipe-num">4</span>
+          <span class="pipe-name">REMEDIATION ACTION</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="thread-container" id="threadScroll">
+      <div class="thread-wrap" id="threadWrap"></div>
+    </div>
+
+    <div class="composer-area">
+      <div class="composer-inner">
+        <div class="composer-box">
+          <textarea id="promptInput" rows="1" placeholder="Ask questions about services, owners, tickets, decisions, runbooks..."></textarea>
+          <div class="composer-actions">
+            <div class="composer-hint" id="composerHint">
+              <span>Enter to send · Shift+Enter for new line</span>
+            </div>
+            <button class="send-btn" id="sendBtn" disabled title="Send (Enter)">↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Evidence Panel (Cytoscape Graph & Details) -->
+  <aside class="right-pane" id="rightPane">
+    <div class="panel-tabs">
+      <button class="tab-btn active" data-tab="graphTab">Evidence Graph</button>
+      <button class="tab-btn" data-tab="inspectorTab">Service Inspector</button>
+      <button class="tab-btn" data-tab="runbooksTab">Runbooks</button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Graph Tab -->
+      <div class="tab-pane active" id="graphTab" style="opacity:1;transform:translateY(0);">
+        <div class="graph-toolbar">
+          <div class="svc-select-wrap">
+            <select class="svc-select" id="serviceSelect" aria-label="Selected Service"></select>
+          </div>
+          <div class="graph-btn-group">
+            <button class="graph-btn" id="zoomInBtn" title="Zoom In">+</button>
+            <button class="graph-btn" id="zoomOutBtn" title="Zoom Out">−</button>
+            <button class="graph-btn" id="resetZoomBtn" title="Fit to View">⊡</button>
+            <button class="graph-btn" id="reLayoutBtn" title="Re-run Physics Layout">↺</button>
+          </div>
+        </div>
+
+        <div id="cy-wrap">
+          <div id="cy"></div>
+          <!-- Corner Floating HUD Elements -->
+          <div class="cy-hud-top-left">
+            <span class="cy-hud-dot"></span>
+            <span id="cyHudTitle">FALKORDB · TOPOLOGY</span>
+          </div>
+          <div class="cy-hud-top-right" id="cyHudStats">NODES: -- · EDGES: --</div>
+          <div class="cy-hud-layout-pills">
+            <button class="cy-layout-pill active" id="btnLayoutCose" title="Force-Directed Physics">FORCE</button>
+            <button class="cy-layout-pill" id="btnLayoutTree" title="Hierarchical Directed Flow">HIERARCHY</button>
+            <button class="cy-layout-pill" id="btnLayoutRadial" title="Concentric Radial Circles">RADIAL</button>
+          </div>
+          <div class="cy-hud-zoom" id="cyHudZoom">ZOOM 100%</div>
+
+          <!-- Tactical Sonar Radar Scanner Overlay -->
+          <div class="graph-loader" id="graphLoader">
+            <div class="radar-scan-box">
+              <div class="radar-crosshair-h"></div>
+              <div class="radar-crosshair-v"></div>
+              <div class="sonar-ring r-1"></div>
+              <div class="sonar-ring r-2"></div>
+              <div class="sonar-ring r-3"></div>
+              <div class="radar-sweep-cone"></div>
+              <div class="radar-blip b-1"></div>
+              <div class="radar-blip b-2"></div>
+              <div class="radar-blip b-3"></div>
+              <div class="radar-center-core"></div>
+            </div>
+            <div class="loader-terminal">
+              <div class="loader-sys-label">FALKORDB // TOPOLOGY_TRAVERSAL</div>
+              <div class="loader-status-text" id="loaderStatusText">RESOLVING DEPENDENCY GRAPH...</div>
+              <div class="loader-wire-bar"><span class="loader-wire-fill"></span></div>
+            </div>
+          </div>
+          <!-- Floating Node Tooltip -->
+          <div class="node-tooltip" id="nodeTooltip"></div>
+        </div>
+
+        <div class="graph-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#ffffff"></span> Service</div>
+          <div class="legend-item"><span class="legend-dot square" style="background:#111;border:1.5px solid #555"></span> Person/Team</div>
+          <div class="legend-item"><span class="legend-dot diamond" style="background:#2a0000;border:1.5px solid #ff4444;border-radius:1px"></span> Incident</div>
+          <div class="legend-item"><span class="legend-dot hex" style="background:#1a1400;border:1.5px solid #888844"></span> Decision</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#000;border:1.5px solid #aaaaaa"></span> Customer</div>
+          <div class="legend-item"><span style="display:inline-block;width:12px;height:1.5px;background:#22aa55;margin-right:2px;"></span> Chosen</div>
+          <div class="legend-item"><span style="display:inline-block;width:12px;height:1px;background:#555;border-top:1px dashed #555;margin-right:2px;"></span> Rejected</div>
+        </div>
+      </div>
+
+      <!-- Inspector Tab -->
+      <div class="tab-pane" id="inspectorTab">
+        <div class="inspector-scroll" id="inspectorContent">
+          <div style="color:var(--fg-faint);text-align:center;padding:40px 0;">Select a service to inspect</div>
+        </div>
+      </div>
+
+      <!-- Runbooks Tab -->
+      <div class="tab-pane" id="runbooksTab">
+        <div class="runbooks-scroll" id="runbooksContent">
+          <div style="color:var(--fg-faint);text-align:center;padding:40px 0;">Loading runbooks...</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const storage = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
+
+let currentView = (window.location.hash === '#console') ? 'console' : 'landing';
+let currentConv = storage.get('conv') || newConvId();
+let currentMode = 'ask';
+let isBusy = false;
+let serviceSet = new Set();
+let allConversations = [];
+let activeService = 'auth-service';
+let currentLayout = 'cose';
+
+function newConvId() { return 'C-' + Math.random().toString(36).slice(2, 10); }
+function escapeHtml(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ================= Navigation & View Switching =================
+function switchView(view) {
+  currentView = view;
+  if (view === 'landing') {
+    $('landingView').style.display = 'block';
+    $('appShell').style.display = 'none';
+    $('navLandingBtn').classList.add('active');
+    $('navConsoleBtn').classList.remove('active');
+    $('headerActionText').textContent = 'Open Console →';
+    try { history.replaceState(null, '', '#overview'); } catch (_) {}
+  } else {
+    $('landingView').style.display = 'none';
+    $('appShell').style.display = 'grid';
+    $('appShell').classList.add('visible');
+    $('navConsoleBtn').classList.add('active');
+    $('navLandingBtn').classList.remove('active');
+    $('headerActionText').textContent = 'Overview / Docs';
+    try { history.replaceState(null, '', '#console'); } catch (_) {}
+    setTimeout(() => {
+      cy.resize();
+      cy.animate({ fit: { padding: 30 } }, { duration: 380, easing: 'ease-out-cubic', queue: false });
+      updateZoomDisplay();
+    }, 80);
+  }
+}
+
+$('navLandingBtn').onclick = () => switchView('landing');
+$('navConsoleBtn').onclick = () => switchView('console');
+$('brandHomeBtn').onclick = () => switchView('landing');
+$('headerActionBtn').onclick = () => switchView(currentView === 'landing' ? 'console' : 'landing');
+$('landingLaunchBtn').onclick = () => switchView('console');
+$('landingSimBtn').onclick = () => {
+  $('simSection').scrollIntoView({ behavior: 'smooth' });
+};
+
+// Handle clicks on landing quick cards
+document.querySelectorAll('.launch-card').forEach(card => {
+  card.onclick = () => {
+    const prompt = card.dataset.prompt;
+    const mode = card.dataset.mode;
+    switchView('console');
+    setMode(mode);
+    sendMessage(prompt, mode);
+  };
+});
+
+// Interactive Live Incident Simulation Replay on Landing Page
+function replaySimulation() {
+  const logBlock = $('simLogBlock');
+  const logs = [
+    '<span class="sim-tag-alert">ALERT</span><b>auth-service</b> returning 401s for 30% of logins',
+    '<b>[TRIAGE AGENT]</b> Hop traversal over DEPENDS_ON*1..4: 6 upstream services impacted',
+    '<b>[BLAST RADIUS]</b> 2 VIP customers hit: Globex Corp, Initech',
+    '<b>[DECISION LINEAGE]</b> DEC-3 (jitter retry) inspected; recent token TTL change detected',
+    '<b>[HANDOFF]</b> Created node <code>(:Incident {id: \'INC-c6775e\'})</code> in graph',
+    '<b>[REMEDIATION AGENT]</b> Recalled procedural memory: checking runbook <code>latency</code>',
+    '<b>[SANDBOX]</b> Counterfactual comparison: Restart vs Drain ➔ <b>Drain chosen</b>',
+    '<b>[ASSIGNED]</b> Gus Moreno (identity) assigned with 4-step verified plan'
+  ];
+  logBlock.innerHTML = '';
+  logs.forEach((line, i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.innerHTML = line;
+      div.style.animation = 'fadeInUp 200ms ease';
+      logBlock.appendChild(div);
+      if (i === 1) $('simNodeAuth').style.boxShadow = '0 0 14px #ffffff';
+      if (i === 2) $('simNodeC').style.boxShadow = '0 0 14px #ffffff';
+      if (i === 6) $('simReceiptBox').style.borderColor = '#ffffff';
+    }, i * 280);
+  });
+}
+$('btnReplaySim').onclick = replaySimulation;
+
+// Configure Marked & DOMPurify
+marked.setOptions({ gfm: true, breaks: true });
+function renderMarkdown(text) {
+  const clean = DOMPurify.sanitize(marked.parse(text || ''));
+  return clean.replace(/\[([A-Za-z0-9][\w.-]{0,40})\]/g, (match, id) => {
+    return `<button class="cite-pill" data-id="${id}">${id}</button>`;
+  });
+}
+
+// ================= Cytoscape Graph Engine (Pure Monochrome Black & White) =================
+const cy = cytoscape({
+  container: $('cy'),
+  wheelSensitivity: 0.18,
+  minZoom: 0.15,
+  maxZoom: 4.0,
+  textureOnViewport: false,
+  hideEdgesOnViewport: false,
+  motionBlur: false,
+  pixelRatio: 'auto',
+  style: [
+    // ---- BASE NODE ----
+    {
+      selector: 'node',
+      style: {
+        'background-color': '#1a1a1a',
+        'border-width': 1.5,
+        'border-color': '#444',
+        width: 14,
+        height: 14,
+        label: 'data(shortName)',
+        color: '#aaaaaa',
+        'font-size': 8,
+        'font-weight': 500,
+        'font-family': 'Inter, system-ui, sans-serif',
+        'text-valign': 'bottom',
+        'text-halign': 'center',
+        'text-margin-y': 4,
+        'text-background-color': '#000000',
+        'text-background-opacity': 0.75,
+        'text-background-padding': 2,
+        'text-background-shape': 'roundrectangle',
+        'text-max-width': '80px',
+        'text-overflow-wrap': 'ellipsis',
+        'transition-property': 'background-color, border-color, border-width, opacity, width, height, shadow-blur, shadow-opacity',
+        'transition-duration': '220ms',
+        'transition-timing-function': 'ease-in-out-cubic'
+      }
+    },
+    // ---- SERVICE nodes — prominent circles ----
+    {
+      selector: 'node[label="Service"]',
+      style: {
+        shape: 'ellipse',
+        'background-color': '#ffffff',
+        'border-color': '#ffffff',
+        'border-width': 0,
+        width: 16,
+        height: 16,
+        color: '#dddddd',
+        'font-size': 8.5,
+        'font-weight': 600,
+        'text-margin-y': 5
+      }
+    },
+    // ---- PERSON / TEAM — square, muted ----
+    {
+      selector: 'node[label="Person"], node[label="Team"]',
+      style: {
+        shape: 'round-rectangle',
+        'background-color': '#111111',
+        'border-color': '#555555',
+        'border-width': 1.5,
+        width: 14,
+        height: 10,
+        color: '#888888',
+        'font-size': 7.5
+      }
+    },
+    // ---- INCIDENT — red-tinted diamond ----
+    {
+      selector: 'node[label="Incident"]',
+      style: {
+        shape: 'diamond',
+        'background-color': '#2a0000',
+        'border-color': '#ff4444',
+        'border-width': 2,
+        width: 18,
+        height: 18,
+        color: '#ff6666',
+        'font-size': 8,
+        'font-weight': 700,
+        'text-margin-y': 6,
+        'shadow-blur': 10,
+        'shadow-color': '#ff0000',
+        'shadow-opacity': 0.4
+      }
+    },
+    // ---- DECISION — hexagon, amber tint ----
+    {
+      selector: 'node[label="Decision"]',
+      style: {
+        shape: 'hexagon',
+        'background-color': '#1a1400',
+        'border-color': '#888844',
+        'border-width': 1.5,
+        width: 14,
+        height: 14,
+        color: '#aaaa66',
+        'font-size': 7.5
+      }
+    },
+    // ---- TICKET / DOCUMENT — small tag ----
+    {
+      selector: 'node[label="Ticket"], node[label="Document"]',
+      style: {
+        shape: 'round-tag',
+        'background-color': '#0d0d0d',
+        'border-color': '#333333',
+        'border-width': 1,
+        width: 12,
+        height: 9,
+        color: '#555555',
+        'font-size': 7
+      }
+    },
+    // ---- CUSTOMER — outlined box ----
+    {
+      selector: 'node[label="Customer"]',
+      style: {
+        shape: 'round-rectangle',
+        'background-color': '#000000',
+        'border-color': '#aaaaaa',
+        'border-width': 1.5,
+        width: 18,
+        height: 10,
+        color: '#aaaaaa',
+        'font-size': 8,
+        'font-weight': 600
+      }
+    },
+    // ---- FOCUS state ----
+    {
+      selector: 'node.focus',
+      style: {
+        'border-width': 2.5,
+        'border-color': '#ffffff',
+        width: 22,
+        height: 22,
+        'font-size': 9,
+        'font-weight': 700,
+        color: '#ffffff',
+        'shadow-blur': 18,
+        'shadow-color': '#ffffff',
+        'shadow-opacity': 0.7,
+        'transition-property': 'width, height, border-width, shadow-blur, shadow-opacity, color',
+        'transition-duration': '260ms',
+        'transition-timing-function': 'ease-out-back'
+      }
+    },
+    // Override focus for incidents (keep red)
+    {
+      selector: 'node[label="Incident"].focus',
+      style: {
+        'shadow-color': '#ff4444',
+        'border-color': '#ff4444',
+        color: '#ff6666'
+      }
+    },
+    { selector: 'node.highlighted', style: { 'border-color': '#ffffff', 'border-width': 2, opacity: 1, 'shadow-blur': 8, 'shadow-color': '#ffffff', 'shadow-opacity': 0.35 } },
+    { selector: 'node.dimmed', style: { opacity: 0.07, 'transition-duration': '180ms' } },
+    // ---- OK / BAD (decision receipt) ----
+    { selector: '.ok', style: { 'border-color': '#44ff88', 'border-width': 2, 'line-color': '#22aa55', width: 2, 'target-arrow-color': '#22aa55', color: '#44ff88' } },
+    { selector: '.bad', style: { 'border-color': '#555555', 'border-width': 1, 'line-color': '#333333', 'line-style': 'dashed', width: 1, 'target-arrow-color': '#444444', color: '#555555' } },
+    // ---- BASE EDGE — thin, muted, labels HIDDEN by default ----
+    {
+      selector: 'edge',
+      style: {
+        width: 1,
+        'line-color': '#252525',
+        'target-arrow-color': '#3a3a3a',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 0.6,
+        'curve-style': 'bezier',
+        'control-point-step-size': 40,
+        // Labels hidden by default — shown only on highlight
+        label: '',
+        'font-size': 7,
+        color: '#666666',
+        'font-family': 'JetBrains Mono, monospace',
+        'text-rotation': 'autorotate',
+        'text-background-color': '#050505',
+        'text-background-opacity': 0,
+        'text-background-padding': 2,
+        'transition-property': 'line-color, opacity, width, target-arrow-color',
+        'transition-duration': '200ms',
+        'transition-timing-function': 'ease-in-out-cubic'
+      }
+    },
+    // ---- HIGHLIGHTED edge — show label ----
+    {
+      selector: 'edge.highlighted',
+      style: {
+        'line-color': '#555555',
+        width: 1.8,
+        opacity: 1,
+        'target-arrow-color': '#888888',
+        label: 'data(type)',
+        color: '#666666',
+        'font-size': 7,
+        'text-background-opacity': 0.9,
+        'text-rotation': 'autorotate'
+      }
+    },
+    { selector: 'edge.dimmed', style: { opacity: 0.02, 'transition-duration': '180ms' } }
+  ]
+});
+
+function updateZoomDisplay() {
+  const zoomPct = Math.round(cy.zoom() * 100);
+  const hudEl = $('cyHudZoom');
+  hudEl.textContent = `ZOOM ${zoomPct}%`;
+  // Flash the HUD on change
+  hudEl.style.opacity = '0.4';
+  clearTimeout(hudEl._ft);
+  hudEl._ft = setTimeout(() => { hudEl.style.opacity = '1'; }, 80);
+}
+cy.on('zoom', updateZoomDisplay);
+
+function updateGraphHud() {
+  $('cyHudTitle').textContent = `ACTIVE: ${activeService || 'TOPOLOGY'}`;
+  $('cyHudStats').textContent = `NODES: ${cy.nodes().length} · EDGES: ${cy.edges().length}`;
+  updateZoomDisplay();
+}
+
+function showGraphLoader(active = true, msg = 'RESOLVING TOPOLOGY HOPS...') {
+  $('graphLoader').classList.toggle('active', active);
+  if (msg) $('loaderStatusText').textContent = msg;
+}
+
+// Compute a short display name for nodes (strip common suffixes, truncate)
+function makeShortName(name) {
+  if (!name) return '';
+  // Shorten known patterns: auth-service -> auth, postgres-main -> postgres
+  return name
+    .replace(/-service$/, '')
+    .replace(/-api$/, ' api')
+    .replace(/-main$/, '')
+    .replace(/^postgres-/, 'pg-')
+    .slice(0, 14);  // max 14 chars
+}
+
+async function renderServiceGraph(svc) {
+  if (!svc) return;
+  activeService = svc;
+  $('serviceSelect').value = svc;
+  showGraphLoader(true, `TRAVERSING HOPS FOR ${svc.toUpperCase()}...`);
+  try {
+    const res = await fetch('/api/graph/' + encodeURIComponent(svc));
+    const g = await res.json();
+    cy.elements().remove();
+    // Enrich nodes with shortName for cleaner labels
+    cy.add(g.nodes.map(n => ({ data: { ...n, shortName: makeShortName(n.name || n.id) } })));
+    cy.add(g.edges.map(e => ({ data: e })));
+    cy.$id(svc).addClass('focus');
+    applyLayout(currentLayout, svc);
+    updateGraphHud();
+    loadServiceInspector(svc);
+  } catch (err) {
+    console.error('Failed to load subgraph:', err);
+  } finally {
+    setTimeout(() => {
+      showGraphLoader(false);
+      updateGraphHud();
+    }, 320);
+  }
+}
+
+// Smooth animated zoom helper (eases zoom + pan together)
+function smoothZoom(targetZoom, duration = 280) {
+  const startZoom = cy.zoom();
+  const startTime = performance.now();
+  // Ease in-out cubic
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  function step(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    const ease = easeInOutCubic(t);
+    const zoom = startZoom + (targetZoom - startZoom) * ease;
+    cy.zoom({ level: zoom, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    updateZoomDisplay();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function applyLayout(name = currentLayout, svc = activeService) {
+  currentLayout = name;
+  $('btnLayoutCose').classList.toggle('active', name === 'cose');
+  $('btnLayoutTree').classList.toggle('active', name === 'tree');
+  $('btnLayoutRadial').classList.toggle('active', name === 'radial');
+
+  if (name === 'tree') {
+    cy.layout({
+      name: 'breadthfirst',
+      directed: true,
+      roots: svc ? '#' + svc : undefined,
+      spacingFactor: 1.8,           // was 1.4, more breathing room
+      animate: true,
+      animationDuration: 520,
+      animationEasing: 'ease-in-out-cubic',
+      padding: 45
+    }).run();
+  } else if (name === 'radial') {
+    cy.layout({
+      name: 'concentric',
+      concentric: ele => (ele.id() === svc ? 12 : (ele.data('label') === 'Service' ? 6 : 2)),
+      levelWidth: () => 2,
+      animate: true,
+      animationDuration: 520,
+      animationEasing: 'ease-in-out-cubic',
+      padding: 45,
+      minNodeSpacing: 70            // was 50, more space
+    }).run();
+  } else {
+    // Default: Force (cose) — optimized for speed + spacing
+    cy.layout({
+      name: 'cose',
+      animate: 'end',
+      animationDuration: 480,
+      animationEasing: 'ease-out-cubic',
+      nodeRepulsion: 80000,         // was 48000 — much more repulsion = breathing room
+      idealEdgeLength: 160,         // was 120
+      edgeElasticity: 0.1,
+      nestingFactor: 1.2,
+      gravity: 0.06,                // lower gravity = more spread
+      padding: 45,
+      numIter: 300,
+      initialTemp: 200,
+      coolingFactor: 0.95,
+      minTemp: 1.0,
+      randomize: false
+    }).run();
+  }
+  setTimeout(updateZoomDisplay, 580);
+}
+
+$('btnLayoutCose').onclick = () => applyLayout('cose');
+$('btnLayoutTree').onclick = () => applyLayout('tree');
+$('btnLayoutRadial').onclick = () => applyLayout('radial');
+
+function showReceiptInGraph(receipt) {
+  switchTab('graphTab');
+  showGraphLoader(true, 'ISOLATING BLAST RADIUS PATHS...');
+  cy.elements().remove();
+  for (const [opt, cls] of [[receipt.rejected, 'bad'], [receipt.chosen, 'ok']]) {
+    const paths = (opt.paths && opt.paths.length) ? opt.paths : opt.takes_down.map(s => [s]);
+    for (const p of paths) {
+      p.forEach((id, idx) => {
+        if (!cy.$id(id).length) {
+          cy.add({ data: { id, name: id, label: id.startsWith('C-') ? 'Customer' : 'Service' } });
+        }
+        cy.$id(id).addClass(cls);
+        if (idx > 0) {
+          const edgeId = p[idx - 1] + '>' + id;
+          if (!cy.$id(edgeId).length) {
+            cy.add({ data: { id: edgeId, source: p[idx - 1], target: id, type: idx === 1 ? 'USES' : 'DEPENDS_ON' } });
+          }
+          cy.$id(edgeId).addClass(cls);
+        }
+      });
+    }
+  }
+  applyLayout(currentLayout);
+  setTimeout(() => {
+    showGraphLoader(false);
+    updateGraphHud();
+  }, 320);
+  $('appShell').classList.add('graph-open');
+}
+
+// Interactive Hover Effects on Nodes (Neighbors Highlight & Floating Tooltip)
+const tooltip = $('nodeTooltip');
+cy.on('mouseover', 'node', e => {
+  const node = e.target;
+  const neighbors = node.neighborhood().add(node);
+  cy.elements().addClass('dimmed');
+  neighbors.removeClass('dimmed');
+  neighbors.nodes().addClass('highlighted');
+  neighbors.edges().addClass('highlighted');
+
+  const renderedPos = node.renderedPosition();
+  const name = node.data('name') || node.id();
+  const label = node.data('label') || 'Node';
+  const connCount = node.connectedEdges().length;
+  const inEdges = node.incomers('edge');
+  const outEdges = node.outgoers('edge');
+
+  // Collect unique relationship types
+  const relTypes = [...new Set(
+    node.connectedEdges().map(ed => ed.data('type')).filter(Boolean)
+  )].slice(0, 3);
+
+  // Type color badge
+  const typeColors = {
+    Service: '#ffffff', Incident: '#ff4444', Decision: '#aaaa44',
+    Customer: '#888888', Person: '#666666', Team: '#666666',
+    Ticket: '#444444', Document: '#444444'
+  };
+  const dot = typeColors[label] || '#555';
+
+  tooltip.style.display = 'block';
+  // Keep tooltip in bounds
+  const cx = cy.width(), cy2 = cy.height();
+  const tx = renderedPos.x + 18;
+  const ty = renderedPos.y - 10;
+  tooltip.style.left = (tx + 240 > cx ? renderedPos.x - 255 : tx) + 'px';
+  tooltip.style.top = (ty + 100 > cy2 ? renderedPos.y - 105 : ty) + 'px';
+
+  tooltip.innerHTML = `
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;"></span>
+      <strong style="font-size:13px;letter-spacing:-0.01em;">${escapeHtml(name)}</strong>
+    </div>
+    <div style="font:10.5px var(--mono);color:#666;margin-bottom:${relTypes.length ? '6px' : '0'};">
+      ${escapeHtml(label)} &nbsp;·&nbsp; ${inEdges.length} in &nbsp;·&nbsp; ${outEdges.length} out
+    </div>
+    ${relTypes.length ? `<div style="font:10px var(--mono);color:#444;">${relTypes.map(r => `<span style="background:#111;border:1px solid #2a2a2a;border-radius:3px;padding:1px 5px;margin-right:3px;">${escapeHtml(r)}</span>`).join('')}</div>` : ''}
+    ${label === 'Service' ? '<div style="font:10px var(--sans);color:#555;margin-top:5px;">Click to explore subgraph →</div>' : ''}
+  `;
+});
+
+cy.on('mouseout', 'node', () => {
+  cy.elements().removeClass('dimmed highlighted');
+  tooltip.style.display = 'none';
+});
+
+cy.on('tap', 'node', e => {
+  const node = e.target;
+  const label = node.data('label');
+  if (label === 'Service') {
+    // Smoothly zoom into the tapped node before loading the new graph
+    cy.animate(
+      { center: { eles: node }, zoom: Math.min(cy.zoom() * 1.6, 2.5) },
+      { duration: 260, easing: 'ease-in-out-cubic', queue: false,
+        complete: () => renderServiceGraph(node.id()) }
+    );
+  } else {
+    highlightNode(node.id());
+  }
+});
+
+function highlightNode(id) {
+  cy.nodes().removeClass('focus');
+  const target = cy.$id(id);
+  if (target.length) {
+    target.addClass('focus');
+    // Smooth animated pan + zoom to the focused node
+    cy.animate(
+      { center: { eles: target }, zoom: Math.max(cy.zoom(), 1.5) },
+      { duration: 380, easing: 'ease-in-out-cubic', queue: false }
+    );
+  }
+}
+
+// Graph Toolbar Controls
+$('serviceSelect').onchange = e => renderServiceGraph(e.target.value);
+$('resetZoomBtn').onclick = () => {
+  cy.animate({ fit: { padding: 30 } }, { duration: 380, easing: 'ease-out-cubic', queue: false });
+  setTimeout(updateZoomDisplay, 400);
+};
+$('zoomInBtn').onclick = () => smoothZoom(Math.min(cy.zoom() * 1.35, 4.0));
+$('zoomOutBtn').onclick = () => smoothZoom(Math.max(cy.zoom() / 1.35, 0.15));
+$('reLayoutBtn').onclick = () => applyLayout(currentLayout);
+
+// ================= Inspector & Runbooks Tabs =================
+async function loadServiceInspector(svc) {
+  const container = $('inspectorContent');
+  container.innerHTML = `
+    <div class="skeleton-box" style="height:86px;margin-bottom:14px;"></div>
+    <div class="skeleton-box" style="height:110px;margin-bottom:14px;"></div>
+    <div class="skeleton-box" style="height:70px;margin-bottom:14px;"></div>
+  `;
+  try {
+    const res = await fetch('/api/service/' + encodeURIComponent(svc));
+    const data = await res.json();
+    const tierCls = data.tier === 1 ? 'tier-1' : (data.tier === 2 ? 'tier-2' : 'tier-3');
+    container.innerHTML = `
+      <div class="service-header-card">
+        <div class="service-tier-row">
+          <span class="tier-tag ${tierCls}">Tier ${data.tier} Service</span>
+          <span style="font:500 11px var(--mono);color:var(--fg-faint);">${svc}</span>
+        </div>
+        <div class="service-name-title">${svc}</div>
+        <div class="service-owner-label">Owned by team <strong>${escapeHtml(data.owning_team || 'unassigned')}</strong></div>
+      </div>
+
+      <div class="inspector-section">
+        <div class="inspector-title">Team Members</div>
+        <div class="member-list">
+          ${(data.team_members || []).map(m => {
+            const parts = m.split(' ');
+            const initials = parts.slice(1).map(p => p[0]).join('').slice(0, 2);
+            return `<div class="member-row"><div class="member-avatar">${initials}</div><span>${escapeHtml(m)}</span></div>`;
+          }).join('') || '<div style="color:var(--fg-faint);font-size:12px;">No members listed</div>'}
+        </div>
+      </div>
+
+      <div class="inspector-section">
+        <div class="inspector-title">Dependencies (${(data.depends_on || []).length})</div>
+        <div class="dep-pills">
+          ${(data.depends_on || []).map(d => `<button class="dep-pill" onclick="renderServiceGraph('${d}')">${d}</button>`).join('') || '<span style="color:var(--fg-faint);font-size:12px;">None</span>'}
+        </div>
+      </div>
+
+      <div class="inspector-section">
+        <div class="inspector-title">Dependents (${(data.depended_on_by || []).length})</div>
+        <div class="dep-pills">
+          ${(data.depended_on_by || []).map(d => `<button class="dep-pill" onclick="renderServiceGraph('${d}')">${d}</button>`).join('') || '<span style="color:var(--fg-faint);font-size:12px;">None</span>'}
+        </div>
+      </div>
+
+      <div class="inspector-section">
+        <div class="inspector-title">Runbook Documents</div>
+        <div class="member-list">
+          ${(data.docs || []).map(doc => `<div class="member-row"><span style="font-family:var(--mono);color:#fff;font-size:10px;border:1px solid #333;padding:1px 4px;border-radius:3px;">DOC</span><span><strong>${escapeHtml(doc.title)}</strong> (by ${escapeHtml(doc.author)})</span></div>`).join('') || '<span style="color:var(--fg-faint);font-size:12px;">No documents attached</span>'}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:#888888;padding:10px;">Failed to load service details</div>`;
+  }
+}
+
+async function loadRunbooksTab() {
+  const container = $('runbooksContent');
+  container.innerHTML = `
+    <div class="skeleton-box" style="height:48px;margin-bottom:12px;"></div>
+    <div class="skeleton-box" style="height:48px;margin-bottom:12px;"></div>
+    <div class="skeleton-box" style="height:48px;margin-bottom:12px;"></div>
+    <div class="skeleton-box" style="height:48px;margin-bottom:12px;"></div>
+  `;
+  try {
+    const res = await fetch('/api/runbooks');
+    const playbooks = await res.json();
+    container.innerHTML = playbooks.map(pb => `
+      <details class="runbook-accordion">
+        <summary>
+          <span style="display:flex;align-items:center;gap:8px;"><span style="font-family:var(--mono);font-size:10px;background:#181818;border:1px solid #333;padding:2px 6px;border-radius:3px;color:#fff;">RUNBOOK</span> ${escapeHtml(pb.issue_type.replace('_', ' ').toUpperCase())}</span>
+          <span style="font:500 11px var(--mono);color:var(--fg-faint);">${(pb.steps || []).length} steps</span>
+        </summary>
+        <div class="runbook-steps-list">
+          ${(pb.steps || []).map((step, idx) => `
+            <div class="runbook-step-card">
+              <div><b>Step ${idx + 1} (${escapeHtml(step.id)}):</b> ${escapeHtml(step.do)}</div>
+              ${step.if_fails ? `<div class="runbook-fallback-block"><strong>IF FAILS:</strong> ${escapeHtml(step.if_fails.do)} ${step.if_fails.changed_by ? `<em>(rewired by ${escapeHtml(step.if_fails.changed_by)})</em>` : ''}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </details>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<div style="color:#888888;padding:10px;">Failed to load runbooks</div>`;
+  }
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.tab-pane').forEach(pane => {
+    if (pane.id === tabId) {
+      pane.style.display = 'flex';
+      // Trigger reflow then animate in
+      void pane.offsetHeight;
+      pane.style.opacity = '1';
+      pane.style.transform = 'translateY(0)';
+      pane.classList.add('active');
+    } else {
+      pane.style.opacity = '0';
+      pane.style.transform = 'translateY(6px)';
+      setTimeout(() => {
+        if (!pane.classList.contains('active')) {
+          pane.style.display = 'none';
+        }
+      }, 180);
+      pane.classList.remove('active');
+    }
+  });
+  if (tabId === 'runbooksTab') loadRunbooksTab();
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => switchTab(btn.dataset.tab);
+});
+
+// ================= Conversation History & Management =================
+async function loadConversations() {
+  try {
+    const res = await fetch('/api/conversations');
+    allConversations = await res.json();
+    renderConversationList();
+  } catch (err) {
+    console.error('Failed to load conversations:', err);
+  }
+}
+
+function renderConversationList() {
+  const q = ($('convSearch').value || '').toLowerCase().trim();
+  const filtered = allConversations.filter(c => !q || (c.title || '').toLowerCase().includes(q));
+  const container = $('convList');
+  if (!filtered.length) {
+    container.innerHTML = `<div style="padding:12px 10px;font:11.5px var(--mono);color:var(--fg-faint);">${q ? 'No matching sessions' : 'No sessions recorded'}</div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(c => `
+    <div class="conv-item ${c.id === currentConv ? 'active' : ''}" data-id="${escapeHtml(c.id)}">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--fg-muted);">◈</span>
+      <span class="conv-title">${escapeHtml(c.title || 'Untitled Session')}</span>
+      <button class="conv-del" title="Delete conversation" data-del="${escapeHtml(c.id)}">×</button>
+    </div>
+  `).join('');
+}
+
+$('convSearch').oninput = renderConversationList;
+
+$('convList').onclick = async e => {
+  const delBtn = e.target.closest('[data-del]');
+  if (delBtn) {
+    e.stopPropagation();
+    const cid = delBtn.dataset.del;
+    await deleteConversation(cid);
+    return;
+  }
+  const item = e.target.closest('.conv-item');
+  if (item) {
+    openConversation(item.dataset.id);
+  }
+};
+
+async function deleteConversation(cid) {
+  try {
+    await fetch('/api/conversations/' + encodeURIComponent(cid), { method: 'DELETE' });
+    allConversations = allConversations.filter(c => c.id !== cid);
+    if (currentConv === cid) {
+      newChat();
+    } else {
+      renderConversationList();
+    }
+  } catch (err) {
+    console.error('Delete failed:', err);
+  }
+}
+
+async function openConversation(id) {
+  currentConv = id;
+  storage.set('conv', id);
+  $('appShell').classList.remove('sidebar-open');
+  renderConversationList();
+  
+  $('threadWrap').innerHTML = '';
+  try {
+    const res = await fetch('/api/conversations/' + encodeURIComponent(id));
+    const msgs = await res.json();
+    if (msgs.length) {
+      msgs.forEach(m => {
+        if (m.role === 'user') {
+          renderUserMessage(m.content);
+        } else {
+          const bot = createBotMessage('Graph Brain');
+          bot.done(m.content);
+        }
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  scrollToBottom();
+}
+
+function newChat() {
+  currentConv = newConvId();
+  storage.set('conv', currentConv);
+  $('threadWrap').innerHTML = '';
+  renderConversationList();
+  $('appShell').classList.remove('sidebar-open');
+  $('promptInput').focus();
+}
+
+$('newChatBtn').onclick = newChat;
+
+// ================= Message Rendering =================
+function renderUserMessage(text, mode = 'ask') {
+  const el = document.createElement('div');
+  el.className = 'message-row user';
+  el.innerHTML = `
+    <div class="user-bubble">
+      ${mode === 'incident' ? `<div class="user-meta"><span class="mode-badge-pill">Live Incident</span></div>` : ''}
+      <div>${escapeHtml(text)}</div>
+    </div>
+  `;
+  $('threadWrap').append(el);
+}
+
+function createBotMessage(who = 'Graph Brain') {
+  const el = document.createElement('div');
+  el.className = 'message-row bot';
+  el.innerHTML = `
+    <div class="bot-container">
+      <div class="bot-header">
+        <div class="agent-pill">GB</div>
+        <span>${escapeHtml(who)}</span>
+      </div>
+    </div>
+  `;
+  $('threadWrap').append(el);
+  const container = el.querySelector('.bot-container');
+
+  let traceEl, stepsEl, stepCount = 0;
+  const contentEl = document.createElement('div');
+  contentEl.className = 'md-content';
+  container.append(contentEl);
+
+  return {
+    el,
+    addStep(html, cls = '') {
+      if (!traceEl) {
+        traceEl = document.createElement('details');
+        traceEl.className = 'trace-card';
+        traceEl.open = true;
+        traceEl.innerHTML = `
+          <summary>
+            <span>Reasoning trace</span>
+            <span class="kbd-hint trace-badge">1 step</span>
+          </summary>
+          <div class="trace-steps"></div>
+        `;
+        container.insertBefore(traceEl, contentEl);
+        stepsEl = traceEl.querySelector('.trace-steps');
+      }
+      stepCount++;
+      const s = document.createElement('div');
+      s.className = 'trace-step-item ' + cls;
+      s.innerHTML = html;
+      stepsEl.append(s);
+      traceEl.querySelector('.trace-badge').textContent = `${stepCount} step${stepCount > 1 ? 's' : ''}`;
+      stepsEl.scrollTop = stepsEl.scrollHeight;
+    },
+    addReceipt(receipt) {
+      const card = createReceiptCard(receipt);
+      container.insertBefore(card, contentEl);
+      showReceiptInGraph(receipt);
+    },
+    done(markdownText) {
+      contentEl.innerHTML = renderMarkdown(markdownText);
+      if (traceEl) traceEl.open = false;
+    },
+    fail(errorText) {
+      contentEl.innerHTML = `<div style="background:#141414;border:1px solid #444444;color:#ffffff;padding:12px;border-radius:6px;font:12px var(--mono);">${escapeHtml(errorText)}</div>`;
+    }
+  };
+}
+
+function createReceiptCard(receipt) {
+  const card = document.createElement('div');
+  card.className = 'receipt-card';
+  card.title = 'Click to visualize impacted customer paths on the Evidence Graph';
+  card.innerHTML = `
+    <div class="receipt-header">
+      <div class="receipt-badge">
+        <span style="font-family:var(--mono);font-weight:700;">⚖</span>
+        <span>Decision Receipt ${receipt.receipt_id ? `· ${escapeHtml(receipt.receipt_id)}` : ''}</span>
+      </div>
+      <span class="receipt-view-btn">Inspect in Graph ◧</span>
+    </div>
+    <div class="receipt-grid">
+      <div class="receipt-col chosen">
+        <div class="receipt-col-title">✓ CHOSEN · ${escapeHtml(receipt.chosen.action)}</div>
+        <div class="receipt-stats">
+          <div>${receipt.chosen.services_down.length} services taken offline</div>
+          <div>PageRank Risk: <strong>${receipt.chosen.risk}</strong></div>
+          <div>Customers: <strong>${(receipt.chosen.customers_hit || []).length}</strong> (VIP: ${(receipt.chosen.vip_hit || []).length})</div>
+        </div>
+      </div>
+      <div class="receipt-col rejected">
+        <div class="receipt-col-title">✗ REJECTED · ${escapeHtml(receipt.rejected.action)}</div>
+        <div class="receipt-stats">
+          <div>${receipt.rejected.services_down.length} services taken offline</div>
+          <div>PageRank Risk: <strong>${receipt.rejected.risk}</strong></div>
+          <div>Customers: <strong>${(receipt.rejected.customers_hit || []).length}</strong> (VIP: ${(receipt.rejected.vip_hit || []).length})</div>
+        </div>
+      </div>
+    </div>
+    <div class="receipt-why">${escapeHtml(receipt.why)}</div>
+  `;
+  card.onclick = () => showReceiptInGraph(receipt);
+  return card;
+}
+
+function scrollToBottom() {
+  $('threadScroll').scrollTop = $('threadScroll').scrollHeight;
+}
+
+function setPipelineStep(stepIndex) {
+  for (let i = 1; i <= 4; i++) {
+    const el = $('pipeStep' + i);
+    if (!el) continue;
+    if (i < stepIndex) {
+      el.className = 'pipeline-step-item completed';
+      el.querySelector('.pipe-num').textContent = '✓';
+    } else if (i === stepIndex) {
+      el.className = 'pipeline-step-item active';
+      el.querySelector('.pipe-num').textContent = i;
+    } else {
+      el.className = 'pipeline-step-item';
+      el.querySelector('.pipe-num').textContent = i;
+    }
+  }
+}
+
+function updateStreamBanner(active, text = '', stepIndex = 1) {
+  const banner = $('streamBanner');
+  banner.style.display = active ? 'flex' : 'none';
+  if (text) $('streamBannerText').textContent = text;
+  if (active) setPipelineStep(stepIndex);
+}
+
+// ================= Send Message & SSE Engine =================
+function sendMessage(text, mode = currentMode) {
+  text = (text || '').trim();
+  if (!text || isBusy) return;
+
+  isBusy = true;
+  $('sendBtn').disabled = true;
+  $('promptInput').value = '';
+  growInput();
+
+  renderUserMessage(text, mode);
+  const botTitle = mode === 'incident' ? 'Triage → Remediation Agent Pipeline' : 'Graph Brain';
+  const bot = createBotMessage(botTitle);
+  updateStreamBanner(true, mode === 'incident' ? 'Triage agent measuring blast radius...' : 'Graph Brain evaluating graph topology...', 1);
+  scrollToBottom();
+
+  const params = new URLSearchParams({ message: text, conversation: currentConv, mode: mode });
+  const es = new EventSource('/api/chat?' + params.toString());
+
+  const finish = () => {
+    es.close();
+    isBusy = false;
+    updateStreamBanner(false);
+    syncSendState();
+    loadConversations();
+    scrollToBottom();
+  };
+
+  es.onmessage = ev => {
+    try {
+      const e = JSON.parse(ev.data);
+      if (e.kind === 'tool_call') {
+        const inputSnippet = JSON.stringify(e.input || {});
+        let step = 2;
+        if (e.tool === 'blast_radius' || e.tool === 'compare_actions') step = 3;
+        else if (e.tool === 'handoff' || e.tool === 'mutate_runbook_fallback' || e.tool === 'add_ticket_resolution') step = 4;
+
+        updateStreamBanner(true, `${e.agent} calling ${e.tool}...`, step);
+        bot.addStep(`<b>${escapeHtml(e.agent)}</b> called <code>${escapeHtml(e.tool)}</code>(<span style="color:var(--fg-faint)">${escapeHtml(inputSnippet.slice(0, 100))}</span>)`);
+        const possibleSvc = Object.values(e.input || {}).find(v => typeof v === 'string' && serviceSet.has(v));
+        if (possibleSvc) renderServiceGraph(possibleSvc);
+      } else if (e.kind === 'tool_result') {
+        bot.addStep(`<pre>${escapeHtml(e.output || '')}</pre>`, e.error ? 'err' : '');
+        if (e.tool === 'compare_actions' && !e.error) {
+          try {
+            const receipt = JSON.parse(e.output);
+            bot.addReceipt(receipt);
+          } catch (_) {}
+        }
+      } else if (e.kind === 'text' && mode === 'incident') {
+        bot.addStep(`<b>${escapeHtml(e.agent)}</b> note: ${escapeHtml(e.text)}`);
+      } else if (e.kind === 'handoff') {
+        updateStreamBanner(true, `Handoff: Incident ${e.incident_id} → Remediation Agent`, 4);
+        bot.addStep(`<strong>Graph Handoff:</strong> Triage agent written incident <code>${escapeHtml(e.incident_id)}</code> → Remediation agent engaged`, 'handoff');
+      } else if (e.kind === 'done' && e.answer) {
+        setPipelineStep(5);
+        bot.done(e.answer);
+        finish();
+      } else if (e.kind === 'error') {
+        bot.fail(e.text);
+        finish();
+      }
+      scrollToBottom();
+    } catch (parseErr) {
+      console.error('SSE JSON error:', parseErr);
+    }
+  };
+
+  es.onerror = () => {
+    if (isBusy) {
+      bot.fail('Stream disconnected before receiving final response.');
+      finish();
+    }
+  };
+}
+
+// Clicks on citations in thread
+$('threadWrap').onclick = e => {
+  const cite = e.target.closest('.cite-pill');
+  if (cite) {
+    const id = cite.dataset.id;
+    if (serviceSet.has(id)) {
+      renderServiceGraph(id);
+      switchTab('graphTab');
+      $('appShell').classList.add('graph-open');
+    } else {
+      highlightNode(id);
+    }
+  }
+};
+
+// ================= Composer & Mode Controls =================
+function setMode(m) {
+  currentMode = m;
+  $('modeAsk').classList.toggle('active', m === 'ask');
+  $('modeInc').classList.toggle('active', m === 'incident');
+  $('promptInput').placeholder = m === 'ask' 
+    ? 'Ask questions about services, owners, tickets, decisions, runbooks...'
+    : 'Paste an alert (e.g. "auth-service returning 500s", "checkout latency spiking to 4s")...';
+  $('composerHint').textContent = m === 'ask'
+    ? 'Answers cite graph nodes. Enter to send · Shift+Enter for new line'
+    : 'Autonomous Multi-Agent: Triage Agent → Incident Node → Remediation Agent';
+}
+
+$('modeAsk').onclick = () => setMode('ask');
+$('modeInc').onclick = () => setMode('incident');
+
+function growInput() {
+  const input = $('promptInput');
+  input.style.height = 'auto';
+  input.style.height = input.scrollHeight + 'px';
+  syncSendState();
+}
+
+function syncSendState() {
+  $('sendBtn').disabled = isBusy || !$('promptInput').value.trim();
+}
+
+$('promptInput').oninput = growInput;
+$('promptInput').onkeydown = e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage($('promptInput').value);
+  }
+};
+$('sendBtn').onclick = () => sendMessage($('promptInput').value);
+
+// Mobile & Panel Toggles
+$('toggleGraphBtn').onclick = () => $('appShell').classList.toggle('graph-open');
+$('mobileMenuBtn').onclick = () => $('appShell').classList.toggle('sidebar-open');
+
+// Global shortcuts
+window.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+    e.preventDefault();
+    newChat();
+  }
+});
+
+// ================= Boot & Health Initialization =================
+(async () => {
+  try {
+    // 1. Fetch Health Status
+    const healthRes = await fetch('/api/health');
+    const health = await healthRes.json();
+    if (health.status === 'ok') {
+      $('healthDot').className = 'status-dot';
+      $('globalStatusDot').className = 'status-pill';
+      $('healthText').textContent = `${health.database} (${health.model})`;
+      $('globalTenantLabel').textContent = `tenant: ${health.tenant || 'acme'}`;
+    } else {
+      $('healthDot').className = 'status-dot degraded';
+      $('globalStatusDot').style.background = '#444';
+      $('healthText').textContent = 'Degraded';
+    }
+
+    // 2. Fetch Services
+    const svcRes = await fetch('/api/services');
+    const svcList = await svcRes.json();
+    serviceSet = new Set(svcList);
+    $('serviceSelect').innerHTML = svcList.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    
+    // 3. Render Initial Service Graph
+    const initialSvc = svcList.includes('auth-service') ? 'auth-service' : (svcList[0] || '');
+    if (initialSvc) {
+      renderServiceGraph(initialSvc);
+    }
+
+    // 4. Load Conversation History
+    await loadConversations();
+    openConversation(currentConv);
+
+    // Default to Landing Page (Overview) unless #console is explicitly requested
+    if (window.location.hash === '#console') {
+      switchView('console');
+    } else {
+      switchView('landing');
+    }
+  } catch (err) {
+    console.error('Initialization error:', err);
+  }
+})();
+</script>
+</body>
+</html>
