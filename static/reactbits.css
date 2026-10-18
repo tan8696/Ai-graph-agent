@@ -127,3 +127,97 @@ canvas[data-rb="particles"] {
   .view-transition { transition: none; }
   .interactive-card:hover { transform: none; }
 }
+/* --- Glassmorphism Paneling & Sleek Scrollbars --- */
+.panel-glass {
+  background: rgba(13, 17, 23, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom minimal scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* --- Interactive Graph Node Glow Animations --- */
+@keyframes blast-pulse {
+  0% {
+    filter: drop-shadow(0 0 2px #ef4444);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px #dc2626);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #ef4444);
+  }
+}
+
+.node-triaged {
+  animation: blast-pulse 2s infinite ease-in-out;
+}
+
+/* --- Agent Message Badges & Step Accordions --- */
+.agent-badge-triage {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.agent-badge-remediation {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Collapsible Cypher / Tool Step details */
+details.tool-call {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  margin: 8px 0;
+  overflow: hidden;
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+details.tool-call summary {
+  padding: 6px 10px;
+  cursor: pointer;
+  color: #94a3b8;
+  user-select: none;
+  background: rgba(255, 255, 255, 0.02);
+}
+details.tool-call summary:hover {
+  color: #f1f5f9;
+}
+details.tool-call pre {
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #38bdf8;
+  overflow-x: auto;
+}
