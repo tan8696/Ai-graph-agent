@@ -6,7 +6,7 @@ import asyncio
 import json
 import os
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from redis.exceptions import ConnectionError as DBConnectionError, TimeoutError as DBTimeoutError
@@ -36,6 +36,33 @@ async def security_headers(request, call_next):
 async def db_unreachable(request, exc):
     # FalkorDB down or FALKORDB_URL unset: a clear 503 instead of a bare 500
     return JSONResponse({"detail": "Graph database unreachable. Set FALKORDB_URL."}, status_code=503)
+
+
+# Caps on the Gemini-backed endpoints. Counted in FalkorDB (it speaks Redis) so all instances share them.
+PER_IP_HOURLY = int(os.environ.get("RATE_LIMIT_PER_IP_HOUR", "10"))
+GLOBAL_DAILY = int(os.environ.get("RATE_LIMIT_GLOBAL_DAY", "300"))
+
+
+def _over_limit(request: Request) -> str | None:
+    # Vercel overwrites X-Forwarded-For with the real client IP; behind other proxies it can be spoofed.
+    ip = (request.headers.get("x-forwarded-for") or "").split(",")[0].strip() or getattr(request.client, "host", "unknown")
+    r = tools._db().connection
+    for key, ttl, cap, msg in (
+        (f"ratelimit:ip:{ip}", 3600, PER_IP_HOURLY, f"Rate limit reached: {PER_IP_HOURLY} agent runs per hour. Try again later."),
+        ("ratelimit:global", 86400, GLOBAL_DAILY, "The demo's daily AI budget is used up. Please come back tomorrow."),
+    ):
+        n = r.incr(key)
+        if n == 1:
+            r.expire(key, ttl)
+        if n > cap:
+            return msg
+    return None
+
+
+def _refuse(msg: str) -> StreamingResponse:
+    async def job(emit):
+        emit({"agent": "system", "kind": "error", "text": msg})
+    return _sse(job)  # an SSE error event, so the UI shows the message instead of "stream disconnected"
 
 
 def _tenant(t: str) -> str:
@@ -149,19 +176,25 @@ async def _incident_turn(alert: str, cid: str, tenant: str, emit) -> None:
 
 
 @app.get("/api/chat")
-async def chat(message: str, conversation: str, mode: str = "ask", tenant: str = "acme"):
+async def chat(request: Request, message: str, conversation: str, mode: str = "ask", tenant: str = "acme"):
     """Server-sent events: one JSON event per agent step. mode=ask -> company-brain chat, mode=incident -> agents."""
     if not 0 < len(message) <= 4000 or not 0 < len(conversation) <= 64 or mode not in ("ask", "incident"):
         raise HTTPException(400, "bad request")
     tenant = _tenant(tenant)
+    if msg := _over_limit(request):
+        return _refuse(msg)
     if mode == "ask":
         return _sse(lambda emit: run_chat(message, conversation, tenant, emit))
     return _sse(lambda emit: _incident_turn(message, conversation, tenant, emit))
 
 
 @app.get("/api/incident")
-async def incident(alert: str, tenant: str = "acme"):
+async def incident(request: Request, alert: str, tenant: str = "acme"):
+    if not 0 < len(alert) <= 4000:
+        raise HTTPException(400, "bad request")
     tenant = _tenant(tenant)
+    if msg := _over_limit(request):
+        return _refuse(msg)
     return _sse(lambda emit: run_incident(alert, tenant, emit=emit))
 
 
