@@ -2,9 +2,9 @@
 
 # 🧠 Graph Brain
 
-### The autonomous DevOps knowledge engine that runs on a graph
+### Your company's memory, wired as a graph, run by agents.
 
-**Paste an alert. Get the blast radius, the right engineer, a VIP-safe fix and a signed decision receipt — all traced through one company graph in FalkorDB.**
+**Paste an alert. In one run you get the blast radius, the right engineer, a fix that keeps VIP customers safe, and a signed decision receipt. Every step is a Cypher query against one FalkorDB graph.**
 
 [![FalkorDB](https://img.shields.io/badge/Powered%20By-FalkorDB-red.svg)](https://www.falkordb.com/)
 [![MCP](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol-blue.svg)](https://modelcontextprotocol.io/)
@@ -13,66 +13,138 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**[🚀 Live demo](https://graphbrains.vercel.app)** · **[📖 Architecture](PROJECT.md)** · **[🎬 Demo script](DEMO_VIDEO.md)** · **[⚡ Quickstart](#-quickstart--setup-guide)**
+### [🚀 Try the live demo](https://graphbrains.vercel.app) · [🎬 Watch the demo video](video/graph-brain-demo.mp4) · [⚡ Run it locally](#-run-it-in-3-commands)
+
+<a href="https://graphbrains.vercel.app"><img src="docs/hero.png" alt="Graph Brain landing page with the incident pipeline simulation" width="900"></a>
+
+**Entered in all three tracks:** Agents That Act on Connected Data · Agent Memory and Coordination · Company Brain
 
 </div>
 
 ---
 
-## ✨ Highlights
+## 😩 The problem
 
-- 💬 **Ask Brain** — ask about any service, owner or past decision in plain English; every answer comes with clickable citation pills that focus the evidence graph.
-- 🚨 **Incident triage in seconds** — blast radius over `DEPENDS_ON*1..6`, PageRank criticality, VIP customer paths and the best-qualified engineer, from one alert.
-- 🤝 **Two agents, zero shared context** — a Triage agent writes an `(:Incident)` node; a Remediation agent picks it up from the graph and finishes the job.
-- 🧪 **Counterfactual sandbox** — compares candidate actions against customer impact before acting, and records the choice as a `(:DecisionReceipt)`.
-- 📝 **Runbooks are graph edges** — `FIRST` / `NEXT` / `IF_FAILS` chains you can rewrite from chat, live, without a redeploy.
-- 🧠 **Memory that lasts** — conversations, episodes and procedures are stored as graph nodes, so the brain remembers across sessions.
-- 🏢 **Multi-tenant** — each company gets its own isolated FalkorDB graph (`tenant_<name>`).
+When something breaks at 3 a.m., the answer to "what is affected, who knows how to fix it, and what changed?" is spread across a service catalog, an on-call sheet, old tickets, a wiki and someone's head. Engineers lose the first stretch of every incident just **finding context**, and the fix they choose can quietly hurt the one customer that matters most.
 
-| Submission | Link |
+## 💡 The solution
+
+Graph Brain puts all of that into **one company graph** in FalkorDB: teams, people, services, dependencies, tickets, decisions, customers and runbooks. Then it lets AI agents **act** on it over MCP:
+
+- 🚨 **Triage agent:** walks the dependency graph for the blast radius, ranks services by PageRank, traces VIP customer paths and finds the engineer who already fixed this kind of issue.
+- 🛠️ **Remediation agent:** picks the incident up *from the graph* (no shared context with Triage), recalls past episodes, pulls the runbook, simulates candidate actions against customer impact and signs a `DecisionReceipt`.
+- 💬 **Ask Brain:** plain-English questions about any service, owner or past decision, answered with citation pills that light up the evidence in the graph.
+
+## ⏱️ Judge this in 60 seconds
+
+1. Open **[graphbrains.vercel.app](https://graphbrains.vercel.app)** and click **Open Console →**.
+2. Switch to **Incident Triage** and paste: `auth-service is returning 401s for 30% of logins`
+3. Watch Triage → handoff → Remediation stream live. The sandbox shows that **rotating the signing key hits 3 VIP customers, while rerouting to the fallback region hits none**, so it reroutes and records the receipt.
+4. In **Ask Brain**, type: `If the replica check fails in the latency runbook, drain traffic to region-b instead.` The runbook is rewired as graph edges, live, with no redeploy.
+
+## 🔁 Before vs. after
+
+| Question during an incident | Without Graph Brain | With Graph Brain |
+|---|---|---|
+| What else breaks? | Read the service catalog by hand | `DEPENDS_ON*1..6` traversal + PageRank |
+| Which customers feel it? Any VIPs? | Guess, or ask account managers | Shortest `Customer -USES-> … -DEPENDS_ON->` paths, VIPs flagged |
+| Who should I page? | Whoever is on call | The engineer with `RESOLVED` tickets of this type nearby, with the path as proof |
+| What changed recently? | Search Slack and wikis | `Decision -SUPERSEDES->` lineage on the service |
+| Is the fix safe? | Hope | Counterfactual sandbox + signed `DecisionReceipt` |
+| Update the runbook | Edit a doc nobody reads | Say it in chat, and the `NEXT` / `IF_FAILS` edges are rewired |
+
+## ✨ Wow moments
+
+- 🤝 **Two agents, zero shared context.** They coordinate only through the `(:Incident)` node's state machine in FalkorDB.
+- 🧪 **Counterfactual sandbox.** Candidate actions are scored against VIP impact and PageRank risk *before* anything runs.
+- 📝 **Self-editing runbooks.** Procedures are `FIRST` / `NEXT` / `IF_FAILS` chains, rewired from chat at runtime.
+- 🧠 **Memory that lasts.** Conversations, episodes and procedures are graph nodes, so the brain remembers across sessions.
+- 🏢 **Multi-tenant.** Each company gets its own isolated graph (`tenant_<name>`).
+- 🔌 **13 MCP tools.** The agents reach data through nothing else.
+
+---
+
+## 🏆 How it maps to the tracks
+
+| Track | What proves it |
 |---|---|
-| **Live deployment** | https://graphbrains.vercel.app (FalkorDB Cloud + Gemini) |
-| **Source code** | https://github.com/tan8696/Ai-graph-agent |
-| **Demo video** | Script and scene plan in [DEMO_VIDEO.md](DEMO_VIDEO.md) |
-| **Tracks** | Agents That Act on Connected Data · Agent Memory and Coordination · Company Brain |
+| **1. Agents That Act on Connected Data** | Agents run multi-hop blast radius traversals (`DEPENDS_ON*1..6`), native PageRank (`algo.pageRank`), shortest VIP customer paths and evidence-backed expert routing, all over MCP. |
+| **2. Agent Memory and Coordination** | Triage writes an `(:Incident)`; Remediation reads it from the graph and logs an `(:Episode)`. Three memory tiers: conversational (`Message`), episodic (`Episode`) and self-editing procedural (`Playbook → ActionRule` chains with fallback branches). |
+| **3. Company Brain** | One graph holds ownership (`Team -OWNS-> Service`), decision lineage (`Decision -SUPERSEDES-> Decision`), runbooks, customers and incident memory, all queryable and editable from chat. |
 
-### 📑 Contents
+## ⚡ Why the graph does the real work (Rule 3)
 
-[Tracks](#-hackathon-tracks-entered) · [Why FalkorDB](#-why-falkordb-is-indispensable-proof-of-real-work) · [Data model](#️-graph-data-model) · [Cypher](#-cypher-queries--graph-algorithms) · [Architecture](#️-architecture--multi-agent-flow) · [MCP tools](#-mcp-tools--http-api) · [Quickstart](#-quickstart--setup-guide) · [Tests](#-graph-verification-test-suite-test_graphpy) · [Structure](#️-project-structure)
+> *"The graph has to do real work. If the product still works once FalkorDB is taken out, the graph is decoration rather than the thing the product runs on."*
 
----
+Take FalkorDB out and Graph Brain stops:
 
-## 🏆 Hackathon Tracks Entered
+1. **Every MCP tool fails.** Each one in `tools.py` is a parameterized Cypher query.
+2. **No blast radius.** Variable-length upstream traversal (`[:DEPENDS_ON*1..6]`) is a graph-native operation.
+3. **No criticality.** Ranking comes from `CALL algo.pageRank('Service', 'DEPENDS_ON')`.
+4. **No coordination.** The two agents share nothing in memory; the `(:Incident)` node is their only channel.
+5. **No runbooks.** Procedures *are* edges (`:FIRST`, `:NEXT`, `:IF_FAILS`).
+6. **No safety check.** The sandbox traverses `Customer -USES-> Service -DEPENDS_ON*0..4-> Target` to protect VIPs.
 
-This project is submitted to **all three hackathon tracks**:
-
-| Track | Implementation & Proof in Graph Brain |
-|---|---|
-| **1. Agents That Act on Connected Data** | Autonomous agents execute complex graph analytics over FalkorDB via the Model Context Protocol (MCP): multi-hop upstream blast radius traversals (`DEPENDS_ON*1..6`), native PageRank criticality scoring (`algo.pageRank`), shortest customer impact paths with VIP risk analysis, and expert routing using historical resolution paths as evidence. |
-| **2. Agent Memory and Coordination** | Multi-agent coordination with **zero direct context sharing**. The **Triage Agent** diagnoses alerts and writes an `(:Incident)` node into FalkorDB; the **Remediation Agent** wakes up, reads the incident from the graph, evaluates counterfactual sandbox scenarios, and logs an `(:Episode)`. Features three tiers of graph-native memory: Conversational (`Message`), Episodic (`Episode`), and Self-Mutating Procedural (`Playbook` -> `ActionRule` chains with dynamic fallback branches). |
-| **3. Company Brain** | A single unified organizational brain consolidating team ownership (`Team -OWNS-> Service`), decision lineage (`Decision -SUPERSEDES-> Decision`), runbooks, customer relationships, and incident memory. Natural language interactions allow engineers to query institutional knowledge or mutate procedural runbooks directly from chat with live graph updates. |
+If the database is unreachable, the page shows a frozen read-only snapshot (`demo.py`) with a "DB unreachable" banner. Chat, incidents, runbooks, the inspector and every agent tool refuse to run without FalkorDB.
 
 ---
 
-## ⚡ Why FalkorDB is Indispensable (Proof of Real Work)
+## 🏗️ How it works
 
-> **Hackathon Rule 3 Compliance:** *“The graph has to do real work. If the product still works once FalkorDB is taken out, the graph is decoration rather than the thing the product runs on.”*
+```text
+Alert ──▶ Triage agent ──MCP──▶ FalkorDB ◀──MCP── Remediation agent ──▶ Plan + DecisionReceipt
+                │                  ▲                     │
+                └── writes (:Incident) ──┘── reads it back ┘
+```
 
-In Graph Brain, **the graph is not a visualization layer — it is the primary execution engine**. If FalkorDB is removed:
-1. **The MCP Server immediately crashes**: Every tool in `tools.py` directly executes parameterized Cypher queries against FalkorDB.
-2. **Blast Radius Analysis Fails**: Relational or document stores cannot compute recursive, variable-length upstream dependency traversals (`[:DEPENDS_ON*1..6]`) with cycle detection and sub-millisecond response times.
-3. **Graph Centrality is Impossible**: Service criticality rankings rely directly on FalkorDB's native graph algorithm library (`CALL algo.pageRank('Service', 'DEPENDS_ON')`).
-4. **Agent Coordination Halts**: The Triage and Remediation agents have separate LLM context windows and share no state in memory. They coordinate **exclusively** through the state machine of the `(:Incident)` node in FalkorDB.
-5. **Procedural Memory Mutation Breaks**: Runbooks are stored as physical graph edges (`:FIRST`, `:NEXT`, `:IF_FAILS`). Operators rewrite remediation procedures at runtime by re-wiring graph edges without redeploying code.
-6. **Counterfactual Safety Fails**: The pre-flight action sandbox traverses customer-to-service paths (`Customer -USES-> Service -DEPENDS_ON*0..4-> Target`) to protect VIP clients before destructive actions (like service restarts) are executed.
+<details>
+<summary><b>Full multi-agent sequence diagram</b></summary>
 
-If the database is unreachable, the web page shows a frozen read-only snapshot of the graph (`demo.py`) with a "DB unreachable" banner, so visitors see an explanation instead of a blank page. Chat, incidents, runbooks, the inspector and every agent tool need FalkorDB and refuse to run without it.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Engineer / SRE
+    participant Web as Web UI (index.html)
+    participant API as FastAPI (app.py)
+    participant Triage as Triage Agent
+    participant Remediation as Remediation Agent
+    participant MCP as MCP Server (mcp_server.py)
+    participant Falkor as FalkorDB (tenant_acme)
 
----
+    User->>Web: Paste alert: "auth-service returning 401s"
+    Web->>API: GET /api/incident (SSE stream)
+    API->>Triage: Run triage agent
+    Triage->>MCP: get_blast_radius("auth-service")
+    MCP->>Falkor: Cypher: DEPENDS_ON*1..6 + PageRank
+    Falkor-->>MCP: Impacted services, VIP customers
+    Triage->>MCP: find_expert_path & decision_lineage
+    MCP->>Falkor: Cypher: Ticket resolvers & Decision chain
+    Triage->>MCP: create_incident(...)
+    MCP->>Falkor: CREATE (:Incident {status: 'triaged'})
+    Falkor-->>API: SSE: event: handoff (incident_id: INC-c6775e)
+    
+    Note over API,Remediation: Decoupled Agent Handoff via FalkorDB
+    
+    API->>Remediation: Run remediation agent (INC-c6775e)
+    Remediation->>MCP: get_incident("INC-c6775e")
+    MCP->>Falkor: MATCH (i:Incident) RETURN i
+    Remediation->>MCP: recall_memory & get_runbook
+    MCP->>Falkor: MATCH (:Playbook)-[:FIRST]->(r:ActionRule)...
+    Remediation->>MCP: compare_actions("Rotate signing key", "Reroute to fallback region")
+    MCP->>Falkor: Counterfactual simulation (VIP safety check)
+    Falkor-->>MCP: Chosen: Reroute (0 VIP hit vs 3 VIP hit)
+    MCP->>Falkor: CREATE (:DecisionReceipt)-[:FOR]->(:Incident)
+    Remediation->>MCP: assign_incident & log_episode
+    MCP->>Falkor: MATCH (i), (p) CREATE (p)-[:ASSIGNED_TO]->(i)
+    Remediation-->>API: Final Plan & Assignee
+    API-->>Web: SSE: event: done (Incident assigned)
+    Web-->>User: Render verified plan, receipt & evidence graph
+```
 
-## 🗺️ Graph Data Model
+</details>
 
-The company graph consists of **13 node labels** and **14 relationship types**, representing the entire operational fabric of an engineering organization.
+<details>
+<summary><b>Graph data model: 13 node labels, 14 relationship types</b></summary>
 
 ```mermaid
 flowchart TD
@@ -129,14 +201,12 @@ flowchart TD
     end
 ```
 
-### Data Compliance Note
-In strict accordance with Hackathon Rule 6, **all data used in this project is 100% synthetic**. The seed script (`seed.py`) deterministically generates a fictional technology company (`acme`) with 30 microservices, 15 engineers across 5 teams, 40 closed tickets, 6 architectural decisions, 5 customer tiers, and 6 active incident playbooks. No private, confidential, or proprietary data is loaded.
+**Synthetic data (Rule 6):** `seed.py` deterministically generates a fictional company (`acme`) with 30 microservices, 15 engineers across 5 teams, 40 closed tickets, 6 architectural decisions, 5 customers and 6 incident playbooks. No private or proprietary data is loaded.
 
----
+</details>
 
-## 🔍 Cypher Queries & Graph Algorithms
-
-Below are the primary Cypher queries and graph algorithms driving Graph Brain (`tools.py`):
+<details>
+<summary><b>The 9 Cypher queries and graph algorithms behind it (<code>tools.py</code>)</b></summary>
 
 ### 1. PageRank Centrality (`criticality`)
 Computes the structural importance of every service in the dependency graph so agents prioritize core infrastructure.
@@ -239,54 +309,10 @@ CREATE (:DecisionReceipt {
 RETURN i.id
 ```
 
----
+</details>
 
-## 🏗️ Architecture & Multi-Agent Flow
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Engineer / SRE
-    participant Web as Web UI (index.html)
-    participant API as FastAPI (app.py)
-    participant Triage as Triage Agent
-    participant Remediation as Remediation Agent
-    participant MCP as MCP Server (mcp_server.py)
-    participant Falkor as FalkorDB (tenant_acme)
-
-    User->>Web: Paste alert: "auth-service returning 401s"
-    Web->>API: GET /api/incident (SSE stream)
-    API->>Triage: Run triage agent
-    Triage->>MCP: get_blast_radius("auth-service")
-    MCP->>Falkor: Cypher: DEPENDS_ON*1..6 + PageRank
-    Falkor-->>MCP: Impacted services, VIP customers
-    Triage->>MCP: find_expert_path & decision_lineage
-    MCP->>Falkor: Cypher: Ticket resolvers & Decision chain
-    Triage->>MCP: create_incident(...)
-    MCP->>Falkor: CREATE (:Incident {status: 'triaged'})
-    Falkor-->>API: SSE: event: handoff (incident_id: INC-c6775e)
-    
-    Note over API,Remediation: Decoupled Agent Handoff via FalkorDB
-    
-    API->>Remediation: Run remediation agent (INC-c6775e)
-    Remediation->>MCP: get_incident("INC-c6775e")
-    MCP->>Falkor: MATCH (i:Incident) RETURN i
-    Remediation->>MCP: recall_memory & get_runbook
-    MCP->>Falkor: MATCH (:Playbook)-[:FIRST]->(r:ActionRule)...
-    Remediation->>MCP: compare_actions("Rotate signing key", "Reroute to fallback region")
-    MCP->>Falkor: Counterfactual simulation (VIP safety check)
-    Falkor-->>MCP: Chosen: Reroute (0 VIP hit vs 3 VIP hit)
-    MCP->>Falkor: CREATE (:DecisionReceipt)-[:FOR]->(:Incident)
-    Remediation->>MCP: assign_incident & log_episode
-    MCP->>Falkor: MATCH (i), (p) CREATE (p)-[:ASSIGNED_TO]->(i)
-    Remediation-->>API: Final Plan & Assignee
-    API-->>Web: SSE: event: done (Incident assigned)
-    Web-->>User: Render verified plan, receipt & evidence graph
-```
-
----
-
-## 🔌 MCP Tools & HTTP API
+<details>
+<summary><b>MCP tools and HTTP API</b></summary>
 
 `mcp_server.py` exposes **13 graph tools** over the Model Context Protocol; the agents call nothing else to reach data.
 
@@ -312,105 +338,52 @@ sequenceDiagram
 | `GET /api/conversations`, `/api/conversations/{cid}` | Stored chat memory |
 | `GET /api/health`, `/healthz` | Health checks |
 
----
-
-## 🚀 Quickstart & Setup Guide
-
-### Prerequisites
-- **Python 3.11+**
-- **Docker** (for local FalkorDB) *OR* a **FalkorDB Cloud** account
-- **Google Gemini API Key** ([Get free key from Google AI Studio](https://aistudio.google.com/apikey))
+</details>
 
 ---
 
-### Step 1: Clone the Repository
+## 🚀 Run it in 3 commands
+
+You need **Python 3.11+**, **Docker** (or a FalkorDB Cloud URL) and a free **[Gemini API key](https://aistudio.google.com/apikey)**.
+
 ```bash
-git clone https://github.com/tan8696/Ai-graph-agent.git
-cd Ai-graph-agent
+git clone https://github.com/tan8696/Ai-graph-agent.git && cd Ai-graph-agent
+docker compose up -d && pip install -r requirements.txt && cp .env.example .env   # then put GEMINI_API_KEY in .env
+python seed.py && python test_graph.py && uvicorn app:app --reload               # open http://localhost:8000
 ```
 
----
+`test_graph.py` should print `all graph checks passed`.
 
-### Step 2: Start FalkorDB
+<details>
+<summary><b>Step-by-step setup, FalkorDB Cloud and CLI agents</b></summary>
 
-#### Option A: Local Docker (Recommended)
+**1. Virtual environment (recommended)**
+
 ```bash
-docker compose up -d
-```
-*This starts FalkorDB on port `6379` and the FalkorDB Browser UI on port `3000`.*
-
-#### Option B: FalkorDB Cloud
-If using FalkorDB Cloud, copy the Redis connection URL into your `.env` file:
-```ini
-FALKORDB_URL=redis://user:password@your-falkordb-instance.falkordb.cloud:port
-```
-*(Tip: URL-encode any special characters in the password).*
-
----
-
-### Step 3: Install Dependencies
-```bash
-# Create virtual environment
 python -m venv .venv
-
-# Activate virtual environment
-# Windows (cmd/PowerShell):
-.venv\Scripts\activate
-# macOS / Linux:
-source .venv/bin/activate
-
-# Install dependencies
+# Windows: .venv\Scripts\activate    macOS / Linux: source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
----
+**2. FalkorDB:** `docker compose up -d` starts FalkorDB on port `6379` and its Browser UI on `3000`. For FalkorDB Cloud, put the connection URL in `.env` instead (URL-encode special characters in the password):
 
-### Step 4: Configure Environment Variables
-Copy `.env.example` to `.env` and set your free Gemini API key:
-```bash
-cp .env.example .env
-```
-Inside `.env`:
 ```ini
-FALKORDB_URL=redis://localhost:6379
+FALKORDB_URL=redis://user:password@your-falkordb-instance.falkordb.cloud:port
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
----
+**3. Seed and test:** `python seed.py` builds the `acme` tenant. ⚠️ Re-running it wipes and rebuilds the tenant, including stored chat history. `python test_graph.py` checks every Cypher operation against the live graph without spending LLM tokens.
 
-### Step 5: Seed the Graph & Run Test Suite
-```bash
-# Seed the synthetic tenant company graph (acme)
-# ⚠️ Re-running wipes and rebuilds the tenant, including stored chat history
-python seed.py
+**4. Run the agents from the terminal:**
 
-# Run graph verification test suite (validates all Cypher queries against live FalkorDB)
-python test_graph.py
-```
-**Expected test suite output:**
-```text
-all graph checks passed
-```
-
----
-
-### Step 6: Launch the Web Application
-```bash
-uvicorn app:app --reload
-```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser.
-
----
-
-### Step 7: (Optional) Run CLI Agents Directly
-You can run the multi-agent incident pipeline directly from your terminal:
 ```bash
 python agents.py "auth-service is returning 401s for 30% of logins"
 ```
 
----
+</details>
 
-## 🧪 Graph Verification Test Suite (`test_graph.py`)
+<details>
+<summary><b>What the test suite covers</b></summary>
 
 `test_graph.py` provides an end-to-end regression test suite verifying all FalkorDB Cypher operations without consuming LLM tokens. It validates:
 - **Blast Radius & Centrality**: Upstream dependency bounds, PageRank score ordering.
@@ -420,21 +393,40 @@ python agents.py "auth-service is returning 401s for 30% of logins"
 - **Counterfactual Action Sandbox**: Automated selection of safest action based on VIP customer protection and decision receipt attachment.
 - **Multi-Tenant Isolation**: Complete data segregation between distinct tenant graphs.
 
----
-
-## 🎥 Demo Walkthrough
-
-A 2½-minute tour (full script in [DEMO_VIDEO.md](DEMO_VIDEO.md)):
-
-1. **Ask Brain** — *"Who should I page for auth-service and what changed recently?"* The agent queries FalkorDB over MCP and answers with citation pills (`[p7]`, `[DEC-3]`) that focus the evidence graph.
-2. **Incident mode** — *"auth-service is returning 401s for 30% of logins."* Triage traces the blast radius, ranks by PageRank and writes an `(:Incident)` node.
-3. **Handoff** — the Remediation agent reads that incident from the graph, recalls past episodes and pulls the runbook.
-4. **Sandbox** — rotating the signing key would hit 3 VIP customers; rerouting to the fallback auth region hits none. It picks the reroute, records a `DecisionReceipt` and assigns the on-call engineer.
-5. **Self-editing runbook** — *"If the replica check fails in the latency runbook, drain traffic to region-b instead."* `update_runbook` rewires the graph live.
+</details>
 
 ---
 
-## 🛠️ Project Structure
+## 🧗 Challenges we ran into
+
+- **Agents that don't share memory still have to agree.** We made the `(:Incident)` node a small state machine (`triaged` → assigned) so the handoff is explicit and auditable.
+- **"Safe" is a graph question.** A restart that looks harmless can sit on a VIP customer's path; the sandbox had to traverse `USES` + `DEPENDS_ON*0..4` before acting, not after.
+- **Editing a linked list in Cypher.** Deleting a runbook step means reconnecting the `:NEXT` pointers around it atomically. `test_graph.py` covers it.
+- **Staying up when the DB isn't.** A read-only snapshot keeps the page honest instead of blank, without pretending the agents still work.
+
+## 🏅 Accomplishments we're proud of
+
+- Two LLM agents coordinating **only** through graph state, live-streamed over SSE.
+- Runbooks you can rewrite by talking to them, with the graph as the source of truth.
+- Every agent claim is backed by a path you can click and see in the graph.
+- A live multi-tenant deployment on FalkorDB Cloud.
+
+## 📚 What we learned
+
+- Graph traversals are the natural shape of operational questions: "what depends on this", "who fixed this nearby", "what did this decision replace".
+- MCP is a clean boundary: the agents never touch the database directly, so every action is a named, testable tool.
+- Storing memory as nodes and edges makes it inspectable, which matters as much as making it persistent.
+
+## 🔭 What's next
+
+- Ingest real signals (PagerDuty, GitHub, Slack) into the graph instead of seed data.
+- Human-in-the-loop approval before the Remediation agent executes an action.
+- Learn edge weights from incident outcomes so routing and the sandbox improve over time.
+
+---
+
+<details>
+<summary><b>🛠️ Project structure</b></summary>
 
 ```text
 ai-agent/
@@ -454,16 +446,15 @@ ai-agent/
 └── README.md              # Submission overview, graph model, Cypher reference, and setup
 ```
 
----
+</details>
 
-## 🤖 AI Coding Assistant Disclosure
+## 🤖 AI coding assistant disclosure
 
-In full compliance with Hackathon rules:
-- **AI Coding Assistants Used**: Antigravity IDE, Google Gemini and Claude Code (Anthropic) were used for code drafting, Cypher syntax checks, test writing, UI styling, bug fixing and deployment hardening.
-- **Participant Contribution & Understanding**: The system architecture, multi-agent coordination protocol, graph schema design, counterfactual sandbox logic, and procedural memory mutation algorithms were designed, verified, and debugged by the human team. All code has been thoroughly tested, analyzed, and understood.
+- **Tools used:** Antigravity IDE, Google Gemini and Claude Code (Anthropic), for code drafting, Cypher syntax checks, test writing, UI styling, bug fixing and deployment hardening.
+- **Our part:** the architecture, multi-agent coordination protocol, graph schema, counterfactual sandbox logic and procedural memory mutation were designed, verified and debugged by the team. All code has been tested and is understood by us.
 
----
+More detail: [PROJECT.md](PROJECT.md) (architecture) · [DEMO_VIDEO.md](DEMO_VIDEO.md) (video script).
 
 ## ⚖️ License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+MIT. See [LICENSE](LICENSE).
