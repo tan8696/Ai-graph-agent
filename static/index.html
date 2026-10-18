@@ -1369,6 +1369,10 @@ select.svc-select {
 }
 
 /* Zoom HUD smooth update */
+.cy-type-chips { position:absolute; left:12px; top:44px; display:flex; gap:6px; flex-wrap:wrap; z-index:5; max-width:70%; }
+.cy-chip { font:600 10px var(--mono); padding:4px 9px; border-radius:999px; background:#0a0a0a; color:#666; border:1px solid #222; cursor:pointer; transition:all .2s ease; }
+.cy-chip:hover { border-color:#555; color:#bbb; }
+.cy-chip.on { background:#fff; color:#000; border-color:#fff; }
 .cy-hud-zoom {
   transition: opacity 150ms ease;
 }
@@ -1841,6 +1845,7 @@ select.svc-select {
   .launchpad-grid { grid-template-columns: 1fr; }
 }
 </style>
+<link rel="stylesheet" href="/static/reactbits.css">
 </head>
 <body>
 
@@ -1879,7 +1884,7 @@ select.svc-select {
         <span class="live-dot"></span>
         <span>Graph-Native Autonomous DevOps · FalkorDB</span>
       </div>
-      <h1>The Company Knowledge Graph for Autonomous DevOps.</h1>
+      <h1 data-rb="blur-text">The Company Knowledge Graph for Autonomous DevOps.</h1>
       <p>Services, teams, tickets, architecture decisions, and self-mutating runbooks live in unified FalkorDB graph memory. Dual AI agents answer live queries and autonomously triage and remediate production incidents.</p>
       <div class="hero-actions">
         <button class="hero-btn-primary" id="landingLaunchBtn">
@@ -1930,19 +1935,19 @@ select.svc-select {
 
     <!-- Metric Strip -->
     <div class="metrics-grid">
-      <div class="metric-box">
-        <div class="metric-num">30</div>
+      <div class="metric-box" data-rb="spotlight">
+        <div class="metric-num" data-rb="countup" data-to="30">30</div>
         <div class="metric-lbl">Services in Dependency Graph</div>
       </div>
-      <div class="metric-box">
-        <div class="metric-num">15</div>
+      <div class="metric-box" data-rb="spotlight">
+        <div class="metric-num" data-rb="countup" data-to="15">15</div>
         <div class="metric-lbl">Engineers with Evidence Paths</div>
       </div>
-      <div class="metric-box">
-        <div class="metric-num">6</div>
+      <div class="metric-box" data-rb="spotlight">
+        <div class="metric-num" data-rb="countup" data-to="6">6</div>
         <div class="metric-lbl">Self-Mutating Runbooks</div>
       </div>
-      <div class="metric-box">
+      <div class="metric-box" data-rb="spotlight">
         <div class="metric-num">&lt; 1.8s</div>
         <div class="metric-lbl">Average Query &amp; Blast Radius Speed</div>
       </div>
@@ -2014,7 +2019,7 @@ select.svc-select {
     <p class="section-subtitle">Click any sample query to launch the Agent Console and run live graph queries immediately.</p>
     
     <div class="launchpad-grid">
-      <div class="launch-card" data-prompt="Who should I page for auth failures on auth-service, and why?" data-mode="ask">
+      <div class="launch-card" data-rb="spotlight" data-prompt="Who should I page for auth failures on auth-service, and why?" data-mode="ask">
         <div class="launch-text">
           <div class="launch-title">Who knows auth-service best?</div>
           <div class="launch-desc">Find resolvers with ticket paths and identity team owners</div>
@@ -2022,7 +2027,7 @@ select.svc-select {
         <span class="launch-arrow">→</span>
       </div>
 
-      <div class="launch-card" data-prompt="auth-service is returning 401s for 30% of logins since 09:10" data-mode="incident">
+      <div class="launch-card" data-rb="spotlight" data-prompt="auth-service is returning 401s for 30% of logins since 09:10" data-mode="incident">
         <div class="launch-text">
           <div class="launch-title">Simulate Live Incident on auth-service</div>
           <div class="launch-desc">Full autonomous triage and remediation agent pipeline</div>
@@ -2030,7 +2035,7 @@ select.svc-select {
         <span class="launch-arrow">→</span>
       </div>
 
-      <div class="launch-card" data-prompt="What is the blast radius if postgres-main goes down?" data-mode="ask">
+      <div class="launch-card" data-rb="spotlight" data-prompt="What is the blast radius if postgres-main goes down?" data-mode="ask">
         <div class="launch-text">
           <div class="launch-title">Blast Radius of postgres-main</div>
           <div class="launch-desc">Compute upstream dependents and VIP customer paths</div>
@@ -2038,7 +2043,7 @@ select.svc-select {
         <span class="launch-arrow">→</span>
       </div>
 
-      <div class="launch-card" data-prompt="postgres-main is degraded. Compare restarting postgres-main against draining traffic to region-b: which customers and VIPs would each hit?" data-mode="ask">
+      <div class="launch-card" data-rb="spotlight" data-prompt="postgres-main is degraded. Compare restarting postgres-main against draining traffic to region-b: which customers and VIPs would each hit?" data-mode="ask">
         <div class="launch-text">
           <div class="launch-title">Restart vs Traffic Drain Sandbox</div>
           <div class="launch-desc">Counterfactual comparison with decision receipt generation</div>
@@ -2189,10 +2194,11 @@ select.svc-select {
           </div>
           <div class="cy-hud-top-right" id="cyHudStats">NODES: -- · EDGES: --</div>
           <div class="cy-hud-layout-pills">
-            <button class="cy-layout-pill active" id="btnLayoutCose" title="Force-Directed Physics">FORCE</button>
+            <button class="cy-layout-pill" id="btnLayoutCose" title="Force-Directed Physics">FORCE</button>
             <button class="cy-layout-pill" id="btnLayoutTree" title="Hierarchical Directed Flow">HIERARCHY</button>
-            <button class="cy-layout-pill" id="btnLayoutRadial" title="Concentric Radial Circles">RADIAL</button>
+            <button class="cy-layout-pill active" id="btnLayoutRadial" title="Concentric Radial Circles">RADIAL</button>
           </div>
+          <div class="cy-type-chips" id="cyChips"></div>
           <div class="cy-hud-zoom" id="cyHudZoom">ZOOM 100%</div>
 
           <!-- Tactical Sonar Radar Scanner Overlay -->
@@ -2261,7 +2267,7 @@ let isBusy = false;
 let serviceSet = new Set();
 let allConversations = [];
 let activeService = 'auth-service';
-let currentLayout = 'cose';
+let currentLayout = 'radial'; // cleanest default: focus node in the centre, rings by type
 
 function newConvId() { return 'C-' + Math.random().toString(36).slice(2, 10); }
 function escapeHtml(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -2369,7 +2375,7 @@ const cy = cytoscape({
         'border-color': '#444',
         width: 14,
         height: 14,
-        label: 'data(shortName)',
+        label: '',
         color: '#aaaaaa',
         'font-size': 8,
         'font-weight': 500,
@@ -2384,8 +2390,9 @@ const cy = cytoscape({
         'text-max-width': '80px',
         'text-overflow-wrap': 'ellipsis',
         'transition-property': 'background-color, border-color, border-width, opacity, width, height, shadow-blur, shadow-opacity',
-        'transition-duration': '220ms',
-        'transition-timing-function': 'ease-in-out-cubic'
+        'transition-duration': '260ms',
+        'transition-timing-function': 'ease-in-out-cubic',
+        'min-zoomed-font-size': 7
       }
     },
     // ---- SERVICE nodes — prominent circles ----
@@ -2398,6 +2405,7 @@ const cy = cytoscape({
         'border-width': 0,
         width: 16,
         height: 16,
+        label: 'data(shortName)',
         color: '#dddddd',
         'font-size': 8.5,
         'font-weight': 600,
@@ -2509,6 +2517,8 @@ const cy = cytoscape({
       }
     },
     { selector: 'node.highlighted', style: { 'border-color': '#ffffff', 'border-width': 2, opacity: 1, 'shadow-blur': 8, 'shadow-color': '#ffffff', 'shadow-opacity': 0.35 } },
+    { selector: 'node.highlighted, node.focus', style: { label: 'data(shortName)', 'z-index': 10 } },
+    { selector: '.hid', style: { display: 'none' } },
     { selector: 'node.dimmed', style: { opacity: 0.07, 'transition-duration': '180ms' } },
     // ---- OK / BAD (decision receipt) ----
     { selector: '.ok', style: { 'border-color': '#44ff88', 'border-width': 2, 'line-color': '#22aa55', width: 2, 'target-arrow-color': '#22aa55', color: '#44ff88' } },
@@ -2518,12 +2528,13 @@ const cy = cytoscape({
       selector: 'edge',
       style: {
         width: 1,
-        'line-color': '#252525',
-        'target-arrow-color': '#3a3a3a',
+        'line-color': '#1c1c1c',
+        'target-arrow-color': '#2a2a2a',
         'target-arrow-shape': 'triangle',
         'arrow-scale': 0.6,
         'curve-style': 'bezier',
-        'control-point-step-size': 40,
+        'control-point-step-size': 28,
+        opacity: 0.8,
         // Labels hidden by default — shown only on highlight
         label: '',
         'font-size': 7,
@@ -2568,9 +2579,29 @@ function updateZoomDisplay() {
 }
 cy.on('zoom', updateZoomDisplay);
 
+const hiddenTypes = new Set(['Ticket', 'Document']); // the noisy types start collapsed
+function applyTypeFilter() {
+  cy.batch(() => cy.nodes().forEach(n => n.toggleClass('hid', hiddenTypes.has(n.data('label')))));
+  cy.edges().forEach(e => e.toggleClass('hid', e.source().hasClass('hid') || e.target().hasClass('hid')));
+  renderChips();
+}
+function renderChips() {
+  const counts = {};
+  cy.nodes().forEach(n => { const l = n.data('label') || 'Node'; counts[l] = (counts[l] || 0) + 1; });
+  $('cyChips').innerHTML = Object.keys(counts).sort().map(l =>
+    `<button class="cy-chip${hiddenTypes.has(l) ? '' : ' on'}" data-t="${escapeHtml(l)}">${escapeHtml(l)} ${counts[l]}</button>`).join('');
+}
+$('cyChips').onclick = e => {
+  const t = e.target.dataset && e.target.dataset.t;
+  if (!t) return;
+  hiddenTypes.has(t) ? hiddenTypes.delete(t) : hiddenTypes.add(t);
+  applyTypeFilter();
+  applyLayout(currentLayout);
+};
+
 function updateGraphHud() {
-  $('cyHudTitle').textContent = `ACTIVE: ${activeService || 'TOPOLOGY'}`;
-  $('cyHudStats').textContent = `NODES: ${cy.nodes().length} · EDGES: ${cy.edges().length}`;
+  $('cyHudTitle').textContent = `ACTIVE: ${activeService || 'TOPOLOGY'}` + ($('cyHudTitle').dataset.demo ? ' · DEMO DATA' : '');
+  $('cyHudStats').textContent = `NODES: ${cy.nodes(':visible').length} · EDGES: ${cy.edges(':visible').length}`;
   updateZoomDisplay();
 }
 
@@ -2598,12 +2629,14 @@ async function renderServiceGraph(svc) {
   showGraphLoader(true, `TRAVERSING HOPS FOR ${svc.toUpperCase()}...`);
   try {
     const res = await fetch('/api/graph/' + encodeURIComponent(svc));
+    $('cyHudTitle').dataset.demo = res.headers.get('X-Data-Source') === 'demo' ? '1' : '';
     const g = await res.json();
     cy.elements().remove();
     // Enrich nodes with shortName for cleaner labels
     cy.add(g.nodes.map(n => ({ data: { ...n, shortName: makeShortName(n.name || n.id) } })));
     cy.add(g.edges.map(e => ({ data: e })));
     cy.$id(svc).addClass('focus');
+    applyTypeFilter();
     applyLayout(currentLayout, svc);
     updateGraphHud();
     loadServiceInspector(svc);
@@ -2657,12 +2690,14 @@ function applyLayout(name = currentLayout, svc = activeService) {
     cy.layout({
       name: 'concentric',
       concentric: ele => (ele.id() === svc ? 12 : (ele.data('label') === 'Service' ? 6 : 2)),
-      levelWidth: () => 2,
+      levelWidth: () => 1,
+      fit: true,
+      avoidOverlap: true,
       animate: true,
       animationDuration: 520,
       animationEasing: 'ease-in-out-cubic',
       padding: 45,
-      minNodeSpacing: 70            // was 50, more space
+      minNodeSpacing: 36
     }).run();
   } else {
     // Default: Force (cose) — optimized for speed + spacing
@@ -2671,13 +2706,15 @@ function applyLayout(name = currentLayout, svc = activeService) {
       animate: 'end',
       animationDuration: 480,
       animationEasing: 'ease-out-cubic',
-      nodeRepulsion: 80000,         // was 48000 — much more repulsion = breathing room
-      idealEdgeLength: 160,         // was 120
-      edgeElasticity: 0.1,
+      nodeRepulsion: 400000,
+      nodeOverlap: 40,
+      idealEdgeLength: 120,
+      edgeElasticity: 100,
       nestingFactor: 1.2,
-      gravity: 0.06,                // lower gravity = more spread
-      padding: 45,
-      numIter: 300,
+      gravity: 80,
+      fit: true,
+      padding: 50,
+      numIter: 800,
       initialTemp: 200,
       coolingFactor: 0.95,
       minTemp: 1.0,
@@ -2713,6 +2750,7 @@ function showReceiptInGraph(receipt) {
       });
     }
   }
+  renderChips();
   applyLayout(currentLayout);
   setTimeout(() => {
     showGraphLoader(false);
@@ -2824,8 +2862,7 @@ async function loadServiceInspector(svc) {
     <div class="skeleton-box" style="height:70px;margin-bottom:14px;"></div>
   `;
   try {
-    const res = await fetch('/api/service/' + encodeURIComponent(svc));
-    const data = await res.json();
+    const data = await getJSON('/api/service/' + encodeURIComponent(svc));
     const tierCls = data.tier === 1 ? 'tier-1' : (data.tier === 2 ? 'tier-2' : 'tier-3');
     container.innerHTML = `
       <div class="service-header-card">
@@ -2870,7 +2907,7 @@ async function loadServiceInspector(svc) {
       </div>
     `;
   } catch (err) {
-    container.innerHTML = `<div style="color:#888888;padding:10px;">Failed to load service details</div>`;
+    container.innerHTML = `<div style="color:#888888;padding:10px;">Failed to load service details: ${escapeHtml(err.message)}</div>`;
   }
 }
 
@@ -2883,8 +2920,8 @@ async function loadRunbooksTab() {
     <div class="skeleton-box" style="height:48px;margin-bottom:12px;"></div>
   `;
   try {
-    const res = await fetch('/api/runbooks');
-    const playbooks = await res.json();
+    const playbooks = await getJSON('/api/runbooks');
+    if (!playbooks.length) { container.innerHTML = `<div style="color:#888888;padding:10px;">No runbooks recorded</div>`; return; }
     container.innerHTML = playbooks.map(pb => `
       <details class="runbook-accordion">
         <summary>
@@ -2902,7 +2939,7 @@ async function loadRunbooksTab() {
       </details>
     `).join('');
   } catch (err) {
-    container.innerHTML = `<div style="color:#888888;padding:10px;">Failed to load runbooks</div>`;
+    container.innerHTML = `<div style="color:#888888;padding:10px;">Failed to load runbooks: ${escapeHtml(err.message)}</div>`;
   }
 }
 
@@ -2937,10 +2974,17 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ================= Conversation History & Management =================
+// fetch + JSON that throws the server's detail on non-2xx, so callers never render an error body as data
+async function getJSON(url) {
+  const res = await fetch(url);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
+  return body;
+}
+
 async function loadConversations() {
   try {
-    const res = await fetch('/api/conversations');
-    allConversations = await res.json();
+    allConversations = await getJSON('/api/conversations');
     renderConversationList();
   } catch (err) {
     console.error('Failed to load conversations:', err);
@@ -3002,8 +3046,7 @@ async function openConversation(id) {
   
   $('threadWrap').innerHTML = '';
   try {
-    const res = await fetch('/api/conversations/' + encodeURIComponent(id));
-    const msgs = await res.json();
+    const msgs = await getJSON('/api/conversations/' + encodeURIComponent(id));
     if (msgs.length) {
       msgs.forEach(m => {
         if (m.role === 'user') {
@@ -3310,8 +3353,9 @@ window.addEventListener('keydown', e => {
 (async () => {
   try {
     // 1. Fetch Health Status
-    const healthRes = await fetch('/api/health');
-    const health = await healthRes.json();
+    // Show the page first so a slow or failing API never leaves a blank screen
+    switchView(window.location.hash === '#console' ? 'console' : 'landing');
+    const health = await getJSON('/api/health').catch(() => ({ status: 'degraded' }));
     if (health.status === 'ok') {
       $('healthDot').className = 'status-dot';
       $('globalStatusDot').className = 'status-pill';
@@ -3320,12 +3364,11 @@ window.addEventListener('keydown', e => {
     } else {
       $('healthDot').className = 'status-dot degraded';
       $('globalStatusDot').style.background = '#444';
-      $('healthText').textContent = 'Degraded';
+      $('healthText').textContent = 'DB unreachable · demo graph';
     }
 
     // 2. Fetch Services
-    const svcRes = await fetch('/api/services');
-    const svcList = await svcRes.json();
+    const svcList = await getJSON('/api/services');
     serviceSet = new Set(svcList);
     $('serviceSelect').innerHTML = svcList.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
     
@@ -3338,17 +3381,11 @@ window.addEventListener('keydown', e => {
     // 4. Load Conversation History
     await loadConversations();
     openConversation(currentConv);
-
-    // Default to Landing Page (Overview) unless #console is explicitly requested
-    if (window.location.hash === '#console') {
-      switchView('console');
-    } else {
-      switchView('landing');
-    }
   } catch (err) {
     console.error('Initialization error:', err);
   }
 })();
 </script>
+<script src="/static/reactbits.js" defer></script>
 </body>
 </html>

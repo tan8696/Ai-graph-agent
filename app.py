@@ -6,14 +6,36 @@ import asyncio
 import json
 import os
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi import FastAPI, HTTPException, Response
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from redis.exceptions import ConnectionError as DBConnectionError, TimeoutError as DBTimeoutError
+from fastapi.staticfiles import StaticFiles
 
+import demo
+import seed
 import tools
 from agents import run_chat, run_incident
 
 app = FastAPI()
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    resp = await call_next(request)
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    return resp
+
+
+@app.exception_handler(DBConnectionError)
+@app.exception_handler(DBTimeoutError)
+async def db_unreachable(request, exc):
+    # FalkorDB down or FALKORDB_URL unset: a clear 503 instead of a bare 500
+    return JSONResponse({"detail": "Graph database unreachable. Set FALKORDB_URL."}, status_code=503)
 
 
 def _tenant(t: str) -> str:
@@ -39,12 +61,28 @@ def index():
 
 @app.get("/api/services")
 def services(tenant: str = "acme"):
-    return [r[0] for r in tools._rows(_tenant(tenant), "MATCH (s:Service) RETURN s.id ORDER BY s.id")]
+    try:
+        return [r[0] for r in tools._rows(_tenant(tenant), "MATCH (s:Service) RETURN s.id ORDER BY s.id")]
+    except HTTPException:
+        raise
+    except Exception:  # database unreachable: serve the bundled synthetic data
+        return sorted(s[0] for s in seed.SERVICES)
 
 
 @app.get("/api/graph/{service_id}")
-def graph(service_id: str, tenant: str = "acme"):
-    return tools.subgraph(_tenant(tenant), service_id)
+def graph(service_id: str, response: Response, tenant: str = "acme"):
+    try:
+        return tools.subgraph(_tenant(tenant), service_id)
+    except HTTPException:
+        raise
+    except Exception:
+        response.headers["X-Data-Source"] = "demo"  # the UI shows a "demo data" badge
+        return demo.subgraph(service_id)
+
+
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
 
 
 @app.get("/api/health")
@@ -60,12 +98,18 @@ def health(tenant: str = "acme"):
 
 @app.get("/api/conversations")
 def conversations(tenant: str = "acme"):
-    return tools.list_conversations(_tenant(tenant))
+    try:
+        return tools.list_conversations(_tenant(tenant))
+    except (DBConnectionError, DBTimeoutError):
+        return []  # no history without a database; the chat view still opens
 
 
 @app.get("/api/conversations/{cid}")
 def conversation(cid: str, tenant: str = "acme"):
-    return tools.chat_history(_tenant(tenant), cid, limit=200)
+    try:
+        return tools.chat_history(_tenant(tenant), cid, limit=200)
+    except (DBConnectionError, DBTimeoutError):
+        return []
 
 
 @app.delete("/api/conversations/{cid}")
@@ -130,7 +174,8 @@ def _sse(job) -> StreamingResponse:
         except Exception as e:
             while hasattr(e, "exceptions") and e.exceptions:  # Unwrap TaskGroup / ExceptionGroup
                 e = e.exceptions[0]
-            q.put_nowait({"agent": "system", "kind": "error", "text": str(e)})
+            text = "Graph database unreachable. Set FALKORDB_URL." if isinstance(e, (DBConnectionError, DBTimeoutError)) else str(e)
+            q.put_nowait({"agent": "system", "kind": "error", "text": text})
         q.put_nowait(None)
 
     async def stream():
@@ -142,3 +187,6 @@ def _sse(job) -> StreamingResponse:
             task.cancel()  # client went away
 
     return StreamingResponse(stream(), media_type="text/event-stream")
+
+
+app.mount("/static", StaticFiles(directory=os.path.join(HERE, "static")), name="static")
