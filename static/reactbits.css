@@ -80,3 +80,50 @@ canvas[data-rb="particles"] {
     transform: none;
   }
 }
+
+/* Smooth fade and slide up for panels, drawers, or modal features */
+@keyframes featureSlideUp {
+  0% { opacity: 0; transform: translateY(16px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Ring glow for live status badges and active agent steps.
+   Named pulseRing because index.html already defines a different pulseGlow. */
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+}
+
+.feature-panel-enter,
+.tab-pane.active {
+  animation: featureSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.status-pill,
+.pipeline-step-item.active {
+  animation: pulseRing 2s ease-in-out infinite;
+}
+
+.view-transition {
+  transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+}
+
+.interactive-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-panel-enter,
+  .tab-pane.active,
+  .status-pill,
+  .pipeline-step-item.active { animation: none; }
+  .interactive-card,
+  .view-transition { transition: none; }
+  .interactive-card:hover { transform: none; }
+}

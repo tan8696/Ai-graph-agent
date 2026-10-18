@@ -1958,25 +1958,25 @@ select.svc-select {
     <p class="section-subtitle">How dual AI agents coordinate through graph nodes instead of unstructured vector context.</p>
 
     <div class="arch-flow-grid">
-      <div class="arch-card">
+      <div class="arch-card interactive-card">
         <div class="arch-card-num">01</div>
         <span class="arch-badge">GRAPH NATIVE</span>
         <h4>Connected Company Memory</h4>
         <p>30 services, 15 engineers, team ownership, past incident tickets, and architecture decisions stored in a unified FalkorDB graph.</p>
       </div>
-      <div class="arch-card">
+      <div class="arch-card interactive-card">
         <div class="arch-card-num">02</div>
         <span class="arch-badge">PAGE RANK</span>
         <h4>Transitive Blast Radius</h4>
         <p>Up to 6-hop dependency traversal computes exact blast radius and identifies impacted VIP customers in milliseconds.</p>
       </div>
-      <div class="arch-card">
+      <div class="arch-card interactive-card">
         <div class="arch-card-num">03</div>
         <span class="arch-badge">AUTONOMOUS</span>
         <h4>Dual-Agent Graph Handoff</h4>
         <p>Triage Agent verifies root cause and creates an Incident node. Remediation Agent immediately engages procedural runbooks.</p>
       </div>
-      <div class="arch-card">
+      <div class="arch-card interactive-card">
         <div class="arch-card-num">04</div>
         <span class="arch-badge">SANDBOX</span>
         <h4>Counterfactual Receipts</h4>
@@ -1989,25 +1989,25 @@ select.svc-select {
     <p class="section-subtitle">A high-fidelity company brain where context is connected graph data, not disconnected text snippets.</p>
     
     <div class="bento-grid">
-      <div class="bento-card col-span-2">
+      <div class="bento-card interactive-card col-span-2">
         <span class="bento-badge">Graph Analytics</span>
         <h3>Transitive Blast Radius &amp; PageRank Criticality</h3>
         <p>Measure upstream dependencies up to 6 hops away, ranked by PageRank scores. Trace customer impact paths in real time and prioritize VIP stakeholders before deploying fixes or taking services down.</p>
       </div>
 
-      <div class="bento-card">
+      <div class="bento-card interactive-card">
         <span class="bento-badge">Multi-Agent</span>
         <h3>Autonomous Handoff via Graph</h3>
         <p>Triage and Remediation agents coordinate strictly through FalkorDB nodes without polluting LLM contexts.</p>
       </div>
 
-      <div class="bento-card">
+      <div class="bento-card interactive-card">
         <span class="bento-badge">Procedural Memory</span>
         <h3>Self-Mutating Graph Runbooks</h3>
         <p>Runbooks are executable graph edges. Operators can rewire fallback branches directly from natural chat without redeploying code.</p>
       </div>
 
-      <div class="bento-card col-span-2">
+      <div class="bento-card interactive-card col-span-2">
         <span class="bento-badge">Counterfactual Sandbox</span>
         <h3>Decision Receipts &amp; Risk Simulation</h3>
         <p>Before executing disruptive commands (restart, failover, rollback), simulate what services go dark and which VIP customers feel the impact. Generates immutable DecisionReceipt nodes.</p>
@@ -2019,7 +2019,7 @@ select.svc-select {
     <p class="section-subtitle">Click any sample query to launch the Agent Console and run live graph queries immediately.</p>
     
     <div class="launchpad-grid">
-      <div class="launch-card" data-rb="spotlight" data-prompt="Who should I page for auth failures on auth-service, and why?" data-mode="ask">
+      <div class="launch-card interactive-card" data-rb="spotlight" data-prompt="Who should I page for auth failures on auth-service, and why?" data-mode="ask">
         <div class="launch-text">
           <div class="launch-title">Who knows auth-service best?</div>
           <div class="launch-desc">Find resolvers with ticket paths and identity team owners</div>
@@ -2027,7 +2027,7 @@ select.svc-select {
         <span class="launch-arrow">→</span>
       </div>
 
-      <div class="launch-card" data-rb="spotlight" data-prompt="auth-service is returning 401s for 30% of logins since 09:10" data-mode="incident">
+      <div class="launch-card interactive-card" data-rb="spotlight" data-prompt="auth-service is returning 401s for 30% of logins since 09:10" data-mode="incident">
         <div class="launch-text">
           <div class="launch-title">Simulate Live Incident on auth-service</div>
           <div class="launch-desc">Full autonomous triage and remediation agent pipeline</div>
@@ -2035,7 +2035,7 @@ select.svc-select {
         <span class="launch-arrow">→</span>
       </div>
 
-      <div class="launch-card" data-rb="spotlight" data-prompt="What is the blast radius if postgres-main goes down?" data-mode="ask">
+      <div class="launch-card interactive-card" data-rb="spotlight" data-prompt="What is the blast radius if postgres-main goes down?" data-mode="ask">
         <div class="launch-text">
           <div class="launch-title">Blast Radius of postgres-main</div>
           <div class="launch-desc">Compute upstream dependents and VIP customer paths</div>
@@ -2043,7 +2043,7 @@ select.svc-select {
         <span class="launch-arrow">→</span>
       </div>
 
-      <div class="launch-card" data-rb="spotlight" data-prompt="postgres-main is degraded. Compare restarting postgres-main against draining traffic to region-b: which customers and VIPs would each hit?" data-mode="ask">
+      <div class="launch-card interactive-card" data-rb="spotlight" data-prompt="postgres-main is degraded. Compare restarting postgres-main against draining traffic to region-b: which customers and VIPs would each hit?" data-mode="ask">
         <div class="launch-text">
           <div class="launch-title">Restart vs Traffic Drain Sandbox</div>
           <div class="launch-desc">Counterfactual comparison with decision receipt generation</div>
