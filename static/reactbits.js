@@ -162,3 +162,63 @@
     init(document);
   }
 })();
+// --- 1. Dynamic Layout Switching ---
+function changeGraphLayout(layoutName) {
+  if (!window.cy) return;
+  const layout = window.cy.layout({
+    name: layoutName,
+    animate: true,
+    animationDuration: 500,
+    fit: true,
+    padding: 30
+  });
+  layout.run();
+}
+
+// --- 2. Neighborhood & Blast Radius Highlighting ---
+function setupCytoscapeInteractions(cy) {
+  // Highlight neighborhood on node click
+  cy.on('tap', 'node', function(evt) {
+    const node = evt.target;
+    
+    // Dim all elements
+    cy.elements().removeClass('highlighted blast-radius dimmed');
+    cy.elements().addClass('dimmed');
+
+    // Highlight selected node, adjacent edges, and connected neighbors
+    const neighborhood = node.neighborhood().add(node);
+    neighborhood.removeClass('dimmed').addClass('highlighted');
+
+    // Pan & zoom smoothly to focus on the selected node
+    cy.animate({
+      center: { eles: node },
+      zoom: Math.max(cy.zoom(), 1.2)
+    }, {
+      duration: 350
+    });
+  });
+
+  // Clicking the background canvas clears the focus
+  cy.on('tap', function(evt) {
+    if (evt.target === cy) {
+      resetHighlighting();
+    }
+  });
+}
+
+function resetHighlighting() {
+  if (!window.cy) return;
+  window.cy.elements().removeClass('dimmed highlighted');
+}
+
+// --- 3. Format Streaming Tool Calls into Collapsible Cards ---
+function renderToolExecution(toolName, queryPayload, resultCount) {
+  return `
+    <details class="tool-call">
+      <summary>
+        <span>⚡ Executed <strong>${toolName}</strong> (${resultCount} nodes matched)</span>
+      </summary>
+      <pre><code>${queryPayload}</code></pre>
+    </details>
+  `;
+}
