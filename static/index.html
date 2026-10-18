@@ -3389,3 +3389,40 @@ window.addEventListener('keydown', e => {
 <script src="/static/reactbits.js" defer></script>
 </body>
 </html>
+<!-- Floating Graph Toolbar (Place inside the Cytoscape canvas parent container) -->
+<div id="graph-controls" class="panel-glass" style="position: absolute; top: 16px; left: 16px; z-index: 10; display: flex; gap: 8px; padding: 6px; border-radius: 8px;">
+  <select id="layout-select" onchange="changeGraphLayout(this.value)" style="background: rgba(0,0,0,0.4); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 4px 8px; font-size: 0.78rem;">
+    <option value="cose">Force-directed (CoSE)</option>
+    <option value="concentric">Concentric (Tier/PageRank)</option>
+    <option value="dagre">Dependency Tree (Dagre)</option>
+  </select>
+
+  <button onclick="cy.fit(null, 30)" style="background: rgba(255,255,255,0.06); color: #cbd5e1; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer;">
+    Fit Canvas
+  </button>
+  <button onclick="resetHighlighting()" style="background: rgba(255,255,255,0.06); color: #cbd5e1; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer;">
+    Reset Focus
+  </button>
+</div>
+
+<!-- Interactive Counterfactual Decision Card Template (For 'compare_actions') -->
+<template id="decision-card-template">
+  <div class="panel-glass" style="margin: 12px 0; border-radius: 8px; padding: 14px; border-left: 3px solid #10b981;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-weight: 600; font-size: 0.85rem; color: #f8fafc;">Autonomous Remediation Selected</span>
+      <span class="agent-badge-remediation">Signed Receipt</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin: 8px 0;">
+      <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 6px;">
+        <div style="color: #f87171; font-weight: 600; margin-bottom: 4px;">Restart (Rejected)</div>
+        <div style="color: #cbd5e1;">Cascading Failure Risk: <strong>High</strong></div>
+        <div style="color: #cbd5e1;">VIP Impact: <strong>14 Tenants</strong></div>
+      </div>
+      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px; border-radius: 6px;">
+        <div style="color: #34d399; font-weight: 600; margin-bottom: 4px;">Reroute (Approved)</div>
+        <div style="color: #cbd5e1;">Cascading Failure Risk: <strong>Zero</strong></div>
+        <div style="color: #cbd5e1;">VIP Impact: <strong>0 Tenants</strong></div>
+      </div>
+    </div>
+  </div>
+</template>
