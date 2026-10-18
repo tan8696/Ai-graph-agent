@@ -222,3 +222,62 @@ function renderToolExecution(toolName, queryPayload, resultCount) {
     </details>
   `;
 }
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements: [ /* ... nodes and edges ... */ ],
+  style: [
+    // Base node styles
+    {
+      selector: 'node',
+      style: {
+        'background-color': '#38bdf8',
+        'label': 'data(id)',
+        'color': '#f8fafc',
+        'font-size': '11px',
+        'transition-property': 'opacity, border-color, border-width',
+        'transition-duration': '0.25s'
+      }
+    },
+    // Base edge styles
+    {
+      selector: 'edge',
+      style: {
+        'width': 2,
+        'line-color': '#475569',
+        'target-arrow-color': '#475569',
+        'target-arrow-shape': 'triangle',
+        'curve-style': 'bezier',
+        'transition-property': 'opacity, line-color',
+        'transition-duration': '0.25s'
+      }
+    },
+    // Dim non-selected items
+    {
+      selector: '.dimmed',
+      style: {
+        'opacity': 0.15
+      }
+    },
+    // Highlighted neighborhood
+    {
+      selector: 'node.highlighted',
+      style: {
+        'border-width': 3,
+        'border-color': '#f59e0b',
+        'opacity': 1.0
+      }
+    },
+    {
+      selector: 'edge.highlighted',
+      style: {
+        'line-color': '#f59e0b',
+        'target-arrow-color': '#f59e0b',
+        'width': 3,
+        'opacity': 1.0
+      }
+    }
+  ]
+});
+
+// Attach interactions
+setupCytoscapeInteractions(cy);
