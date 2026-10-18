@@ -8,6 +8,13 @@
 
 > **Graph Brain** is an autonomous multi-agent DevOps knowledge engine built on a unified company graph in **FalkorDB**. Services, topological dependencies, engineering teams, incident playbooks, architectural decisions, customer impact paths, and multi-agent coordination states all live in a single high-performance graph.
 
+| Submission | Link |
+|---|---|
+| **Live deployment** | https://graphbrains.vercel.app (FalkorDB Cloud + Gemini) |
+| **Source code** | https://github.com/tan8696/Ai-graph-agent |
+| **Demo video** | _TODO: add video link_ |
+| **Tracks** | Agents That Act on Connected Data · Agent Memory and Coordination · Company Brain |
+
 ---
 
 ## 🏆 Hackathon Tracks Entered
@@ -33,6 +40,8 @@ In Graph Brain, **the graph is not a visualization layer — it is the primary e
 4. **Agent Coordination Halts**: The Triage and Remediation agents have separate LLM context windows and share no state in memory. They coordinate **exclusively** through the state machine of the `(:Incident)` node in FalkorDB.
 5. **Procedural Memory Mutation Breaks**: Runbooks are stored as physical graph edges (`:FIRST`, `:NEXT`, `:IF_FAILS`). Operators rewrite remediation procedures at runtime by re-wiring graph edges without redeploying code.
 6. **Counterfactual Safety Fails**: The pre-flight action sandbox traverses customer-to-service paths (`Customer -USES-> Service -DEPENDS_ON*0..4-> Target`) to protect VIP clients before destructive actions (like service restarts) are executed.
+
+If the database is unreachable, the web page shows a frozen read-only snapshot of the graph (`demo.py`) with a "DB unreachable" banner, so visitors see an explanation instead of a blank page. Chat, incidents, runbooks, the inspector and every agent tool need FalkorDB and refuse to run without it.
 
 ---
 
@@ -393,8 +402,10 @@ ai-agent/
 ├── tools.py               # Pure Cypher implementation for all FalkorDB operations & algorithms
 ├── seed.py                # Synthetic company data generator (services, teams, runbooks, tickets)
 ├── test_graph.py          # Comprehensive Cypher & graph algorithm verification suite
+├── demo.py                # Read-only graph snapshot shown only when FalkorDB is unreachable
 ├── static/
-│   └── index.html         # Single-page UI with Cytoscape.js graph visualizer and SSE chat
+│   ├── index.html         # Single-page UI with Cytoscape.js graph visualizer and SSE chat
+│   └── reactbits.js/.css  # Small UI effects (spotlight cards, text animations)
 ├── docker-compose.yml     # Official FalkorDB container configuration (ports 6379, 3000)
 ├── requirements.txt       # Python dependencies (falkordb, fastapi, uvicorn, mcp)
 ├── PROJECT.md             # In-depth architectural specification and system guide
@@ -406,7 +417,7 @@ ai-agent/
 ## 🤖 AI Coding Assistant Disclosure
 
 In full compliance with Hackathon rules:
-- **AI Coding Assistants Used**: Antigravity IDE and Google Gemini were utilized for iterative code drafting, Cypher syntax verification, test writing, and CSS/HTML styling.
+- **AI Coding Assistants Used**: Antigravity IDE, Google Gemini and Claude Code (Anthropic) were used for code drafting, Cypher syntax checks, test writing, UI styling, bug fixing and deployment hardening.
 - **Participant Contribution & Understanding**: The system architecture, multi-agent coordination protocol, graph schema design, counterfactual sandbox logic, and procedural memory mutation algorithms were designed, verified, and debugged by the human team. All code has been thoroughly tested, analyzed, and understood.
 
 ---
